@@ -133,6 +133,62 @@
   .pickmenu .sep{height:1px;background:var(--border);margin:5px 4px}
   .alink{display:inline-block;background:none;border:0;padding:0;margin-top:7px;color:var(--accent);font:inherit;font-size:12px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
   .note-box{font-size:12px;color:var(--faint);text-align:center;padding:4px 0 24px}
+  /* Mobile-first view: compact cards instead of a horizontally scrolling table */
+  .mobile-history{display:none}
+  .mobile-visit{border-bottom:1px solid var(--border)}
+  .mobile-visit:last-child{border-bottom:0}
+  .mobile-summary{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;background:var(--card)}
+  .mobile-summary:active{background:var(--hover)}
+  .mobile-chevron{color:var(--muted);font-size:12px;width:14px}
+  .mobile-date{font-weight:700;min-width:82px}
+  .mobile-km{font-size:12px;color:var(--muted);margin-top:2px}
+  .mobile-count{margin-left:auto;background:var(--chip-bg);color:var(--chip-fg);border-radius:999px;padding:3px 8px;font-size:11px;white-space:nowrap}
+  .mobile-items{background:var(--card2);padding:0 12px 10px}
+  .mobile-item{position:relative;padding:11px 40px 11px 0;border-top:1px solid var(--border)}
+  .mobile-item:first-child{border-top:0}
+  .mobile-item .cat{margin:0 0 5px 0}
+  .mobile-item .ititle{font-weight:650;line-height:1.4}
+  .mobile-item .idesc{color:var(--muted);font-size:12px;line-height:1.45;margin-top:4px}
+  .mobile-item .icost{color:var(--muted);font-size:12px;margin-top:4px}
+  .mobile-actions{position:absolute;right:0;top:10px;display:flex;gap:2px}
+  .filter-mobile-toggle{display:none}
+  @media(max-width:767px){
+    .wrap{padding:12px}
+    .topbar{font-size:12px;line-height:1.45;margin-bottom:14px}
+    header.app{margin-bottom:14px;gap:10px}
+    .brand .ico{width:44px;height:44px;font-size:24px}
+    h1{font-size:22px}
+    .tools{width:100%;display:grid;grid-template-columns:40px 1fr 1.25fr;gap:7px}
+    .tools .saved{display:none}
+    .tools .menuwrap{width:100%}
+    .tools .menuwrap .btn{width:100%;justify-content:center}
+    .tools #addBtn{width:100%;justify-content:center;padding:9px 8px;font-size:13px}
+    .card{border-radius:13px;margin-bottom:14px}
+    .card .pad{padding:13px}
+    #plannedCard{height:40vh;min-height:260px}
+    #plannedList li{padding:11px 10px;gap:9px}
+    .ptxt{font-size:13px}
+    .taskform{gap:9px}
+    .taskform>div{width:100%!important;flex-basis:100%!important}
+    .taskform .btn{flex:1;justify-content:center}
+    .filter-mobile-toggle{display:flex;width:100%;justify-content:space-between;margin-top:10px}
+    #filterBody.hidden-mobile{display:none}
+    .grid4{grid-template-columns:1fr;gap:10px}
+    .filterrow{align-items:stretch;gap:9px}
+    .filterrow .menuwrap{width:100%}
+    .filterrow .menuwrap .btn{width:100%;justify-content:space-between}
+    .filterrow .link{margin-left:0;text-align:left;padding:5px 0}
+    .filterrow .chips{width:100%}
+    #catMenu{width:100%!important}
+    .desktop-table{display:none}
+    .mobile-history{display:block}
+    .tblhead{padding:10px 13px}
+    .tblhead strong{font-size:13px}
+    .modal{padding:18px;max-height:92vh}
+    .grid2{grid-template-columns:1fr;gap:10px}
+    .mhead h2{font-size:17px}
+    .pickmenu{max-height:42vh}
+  }
 </style>
 </head>
 <body>
@@ -183,19 +239,22 @@
 
   <section class="card pad">
     <div class="ttl">&#9662; Filtry</div>
-    <div class="grid4" style="margin-top:12px">
-      <div><label class="fl">Data od</label><input type="date" id="fDateFrom" /></div>
-      <div><label class="fl">Data do</label><input type="date" id="fDateTo" /></div>
-      <div><label class="fl">Przebieg od (km)</label><input type="number" id="fKmFrom" placeholder="0" /></div>
-      <div><label class="fl">Przebieg do (km)</label><input type="number" id="fKmTo" placeholder="999999" /></div>
-    </div>
-    <div class="filterrow">
-      <div class="menuwrap">
-        <button class="btn sm" id="catBtn">Kategorie &#9662;</button>
-        <div class="menu hidden" id="catMenu" style="max-height:300px;overflow:auto;left:0;right:auto"></div>
+    <button class="btn sm filter-mobile-toggle" id="filterToggle">Pokaż filtry <span id="filterChevron">&#9662;</span></button>
+    <div id="filterBody" class="hidden-mobile">
+      <div class="grid4" style="margin-top:12px">
+        <div><label class="fl">Data od</label><input type="date" id="fDateFrom" /></div>
+        <div><label class="fl">Data do</label><input type="date" id="fDateTo" /></div>
+        <div><label class="fl">Przebieg od (km)</label><input type="number" id="fKmFrom" placeholder="0" /></div>
+        <div><label class="fl">Przebieg do (km)</label><input type="number" id="fKmTo" placeholder="999999" /></div>
       </div>
-      <div class="chips" id="catChips"></div>
-      <button class="link" id="clearF">Wyczyść filtry</button>
+      <div class="filterrow">
+        <div class="menuwrap">
+          <button class="btn sm" id="catBtn">Kategorie &#9662;</button>
+          <div class="menu hidden" id="catMenu" style="max-height:300px;overflow:auto;left:0;right:auto"></div>
+        </div>
+        <div class="chips" id="catChips"></div>
+        <button class="link" id="clearF">Wyczyść filtry</button>
+      </div>
     </div>
   </section>
 
@@ -204,7 +263,7 @@
       <strong id="visitCount"></strong>
       <button class="btn sm" id="expandAll">Rozwiń wszystkie</button>
     </div>
-    <div style="overflow-x:auto"><table id="tbl">
+    <div class="desktop-table" style="overflow-x:auto"><table id="tbl">
       <thead><tr>
         <th style="width:34px"></th>
         <th><button data-sort="date">Data <span class="ar">&#8645;</span></button></th>
@@ -215,6 +274,7 @@
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table></div>
+    <div class="mobile-history" id="mobileHistory"></div>
   </section>
 
   <p class="note-box">Dane zapisują się automatycznie w tej przeglądarce (localStorage). Użyj „Opcje &rarr; Eksport”, aby zrobić kopię zapasową.</p>
@@ -286,7 +346,7 @@ var order   = load(K_ORDER, null)   || entries.filter(function(e){return e.statu
 var theme   = (function(){try{var t=localStorage.getItem(K_THEME);return t==='light'||t==='dark'?t:'dark';}catch(e){return 'dark';}})();
 var nextId  = Math.max.apply(null, entries.map(function(e){return e.id;}).concat([0])) + 1;
 
-var sortKey='date', sortDir='desc', expanded={}, editingId=null, selCats=[], pickedPlannedId=null;
+var sortKey='date', sortDir='desc', expanded={}, editingId=null, mobileEditId=null, modalEditId=null, selCats=[], pickedPlannedId=null;
 var $=function(id){return document.getElementById(id);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function fmtDate(d){if(!d)return '\u2014';var p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
@@ -419,8 +479,36 @@ function renderTable(){
     }
   });
   $('tbody').innerHTML=h;
+  renderMobileHistory(gs);
   var ths=document.querySelectorAll('th button[data-sort]');
   for(var i=0;i<ths.length;i++){ths[i].classList.toggle('active',ths[i].getAttribute('data-sort')===sortKey);}
+}
+function renderMobileHistory(gs){
+  var h='';
+  if(!gs.length){$('mobileHistory').innerHTML='<div class="empty">Brak wpisów spełniających kryteria filtrów.</div>';return;}
+  gs.forEach(function(g){
+    var open=!!expanded[g.key];
+    h+='<div class="mobile-visit" data-mg="'+esc(g.key)+'">'+
+      '<div class="mobile-summary">'+
+      '<span class="mobile-chevron">'+(open?'&#9662;':'&#9656;')+'</span>'+
+      '<div><div class="mobile-date">'+fmtDate(g.date)+'</div><div class="mobile-km">'+fmtKm(g.mileage,g.approx)+'</div></div>'+
+      '<span class="mobile-count">'+g.items.length+' '+(g.items.length===1?'pozycja':'pozycje')+'</span></div>';
+    if(open){
+      h+='<div class="mobile-items">';
+      g.items.forEach(function(e){
+        h+='<div class="mobile-item">'+
+          '<span class="cat'+(selCats.indexOf(e.category)>=0?' sel':'')+'">'+esc(e.category)+'</span>'+
+          '<div class="ititle">'+esc(e.title)+'</div>'+
+          (e.description?'<div class="idesc">'+esc(e.description)+'</div>':'')+
+          (e.cost?'<div class="icost">Koszt: '+esc(e.cost)+'</div>':'')+
+          (e.source?'<a class="src" href="'+esc(e.source)+'" target="_blank" rel="noreferrer">źródło / link</a>':'')+
+          '<div class="mobile-actions"><button class="iconbtn" data-edit="'+e.id+'" title="Edytuj">&#9998;</button><button class="iconbtn del" data-delid="'+e.id+'" title="Usuń">&#128465;</button></div></div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  $('mobileHistory').innerHTML=h;
 }
 function renderAll(){renderTop();renderPlanned();renderCats();renderTable();}
 
@@ -472,6 +560,7 @@ function setCustomMode(on){
   if(on){$('mPickMenu').classList.add('hidden');}
 }
 function openAdd(){
+  modalEditId=null;
   fillPick();
   ['mDate','mMileage','mDesc','mCost','mSrc','mCustomCat','mTitle','mTitle2','mCat'].forEach(function(i){$(i).value='';});
   $('mApprox').checked=false;$('mRemove').checked=true;$('mRemoveWrap').classList.add('hidden');
@@ -513,11 +602,17 @@ $('mSave').addEventListener('click',function(){
   var cat=custom?($('mCustomCat').value.trim()||'Inne'):($('mCat').value||'Inne');
   var title=(custom?$('mTitle2').value.trim():$('mTitle').value.trim())||cat;
   var st=document.querySelector('input[name=mStatus]:checked').value;
-  var e={id:nextId++,date:$('mDate').value||null,mileage:$('mMileage').value?+$('mMileage').value:null,
+  var e={id:modalEditId!=null?modalEditId:nextId++,date:$('mDate').value||null,mileage:$('mMileage').value?+$('mMileage').value:null,
     mileageApprox:$('mApprox').checked,category:cat,title:title,description:$('mDesc').value.trim()||null,
     cost:$('mCost').value.trim()||null,source:$('mSrc').value.trim()||null,status:st,done:false};
-  entries.unshift(e);
-  if(st==='planned')order.push(e.id);
+  if(modalEditId!=null){
+    entries=entries.map(function(x){return x.id===modalEditId?e:x;});
+    if(st==='planned'&&order.indexOf(e.id)<0)order.push(e.id);
+    if(st==='completed')order=order.filter(function(x){return x!==e.id;});
+  }else{
+    entries.unshift(e);
+    if(st==='planned')order.push(e.id);
+  }
   if(pickedPlannedId!=null&&$('mRemove').checked&&st==='completed'){
     var pid=pickedPlannedId;
     entries=entries.filter(function(x){return x.id!==pid;});
@@ -565,6 +660,12 @@ $('importFile').addEventListener('change',function(){
   r.readAsText(f);this.value='';
 });
 $('addBtn').addEventListener('click',openAdd);
+$('filterToggle').addEventListener('click',function(){
+  var body=$('filterBody'), hidden=body.classList.contains('hidden-mobile');
+  body.classList.toggle('hidden-mobile',!hidden);
+  this.childNodes[0].nodeValue=hidden?'Ukryj filtry ':'Pokaż filtry ';
+  $('filterChevron').innerHTML=hidden?'&#9652;':'&#9662;';
+});
 $('doReset').addEventListener('click',function(){
   entries=clone(SEED.entries);
   order=entries.filter(function(e){return e.status==='planned';}).map(function(e){return e.id;});
@@ -607,6 +708,25 @@ document.querySelector('thead').addEventListener('click',function(e){
   var k=b.getAttribute('data-sort');
   if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=k;sortDir='asc';}
   renderTable();
+});
+$('mobileHistory').addEventListener('click',function(e){
+  var ed=e.target.closest('[data-edit]');
+  if(ed){
+    var id=+ed.getAttribute('data-edit'), x=null;
+    entries.forEach(function(a){if(a.id===id)x=a;});
+    if(!x)return;
+    modalEditId=id; fillPick(); pickedPlannedId=null;
+    $('mDate').value=x.date||''; $('mMileage').value=x.mileage==null?'':x.mileage;
+    $('mApprox').checked=!!x.mileageApprox; $('mTitle').value=x.title; $('mCat').value=x.category;
+    $('mDesc').value=x.description||''; $('mCost').value=x.cost||''; $('mSrc').value=x.source||'';
+    $('mPickLabel').textContent=x.title; $('mPickMenu').classList.add('hidden'); setCustomMode(false);
+    document.querySelector('input[name=mStatus][value='+x.status+']').checked=true;
+    $('ovAdd').classList.add('on'); return;
+  }
+  var dlm=e.target.closest('[data-delid]');
+  if(dlm){removeEntry(+dlm.getAttribute('data-delid'));return;}
+  var v=e.target.closest('[data-mg]');
+  if(v){var k=v.getAttribute('data-mg');expanded[k]=!expanded[k];renderTable();}
 });
 $('tbody').addEventListener('click',function(e){
   var se=e.target.closest('[data-saveedit]');
@@ -663,3 +783,4 @@ applyTheme();renderAll();
 </script>
 </body>
 </html>
+
