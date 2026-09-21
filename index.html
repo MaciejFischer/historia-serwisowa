@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Historia Serwisowa Samochodu</title>
+<style>
+  :root{
+    --accent:#f59e0b; --accent-fg:#0f172a; --green:#10b981; --red:#ef4444;
+    --radius:12px;
+  }
+  html[data-theme="dark"]{
+    --bg:#020617; --fg:#f1f5f9; --card:#0f172a; --card2:#16233b; --border:#1e293b;
+    --muted:#94a3b8; --faint:#64748b; --input:#1e293b; --hover:rgba(148,163,184,.10);
+    --chip-bg:#1e293b; --chip-fg:#cbd5e1; --shadow:0 10px 30px rgba(0,0,0,.45);
+  }
+  html[data-theme="light"]{
+    --bg:#f8fafc; --fg:#0f172a; --card:#ffffff; --card2:#f8fafc; --border:#e2e8f0;
+    --muted:#64748b; --faint:#94a3b8; --input:#ffffff; --hover:rgba(15,23,42,.05);
+    --chip-bg:#e2e8f0; --chip-fg:#334155; --shadow:0 10px 30px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;transition:background .2s,color .2s}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px}
+  @media(min-width:768px){.wrap{padding:28px}}
+  .topbar{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:13px;color:var(--faint);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:20px}
+  .topbar b{color:var(--muted);font-weight:600}
+  header.app{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .ico{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);font-size:30px;line-height:1;color:var(--accent)}
+  h1{font-size:26px;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:13px;margin:2px 0 0}
+  .tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  button,.btn{font:inherit;cursor:pointer}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--fg);transition:background .15s}
+  .btn:hover{background:var(--hover)}
+  .btn.sm{padding:6px 10px;font-size:12px}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
+  .btn.primary:hover{filter:brightness(1.07)}
+  .cog{font-size:19px;line-height:1}
+  .btn.icon{width:40px;height:40px;padding:0;justify-content:center}
+  .btn.danger{color:var(--red)}
+  .saved{font-size:12px;color:var(--faint);opacity:0;transition:opacity .4s}
+  .saved.on{opacity:1}
+  .menuwrap{position:relative}
+  .menu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;min-width:250px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:6px}
+  .menu button,.menu label{display:flex;width:100%;align-items:center;gap:8px;padding:9px 12px;border:0;background:none;color:var(--fg);border-radius:8px;text-align:left;font:inherit;cursor:pointer}
+  .menu button:hover,.menu label:hover{background:var(--hover)}
+  .menu .sep{height:1px;background:var(--border);margin:6px 4px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:20px}
+  .card .pad{padding:16px}
+  .ttl{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ttl .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--faint);font-size:12px}
+  /* planned */
+  #plannedCard{display:flex;flex-direction:column;height:35vh;min-height:250px}
+  #plannedList{flex:1;min-height:0;overflow-y:auto;list-style:none;margin:12px 0 0;padding:0 4px 0 0;display:flex;flex-direction:column;gap:8px}
+  #plannedList li{display:flex;align-items:flex-start;gap:10px;padding:9px 11px;border:1px solid var(--border);background:var(--card2);border-radius:10px;cursor:grab;user-select:none;transition:background .15s,border-color .15s,opacity .15s}
+  #plannedList li:hover{background:var(--hover)}
+  #plannedList li.done{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.45)}
+  #plannedList li.dragging{opacity:.4;border-color:var(--accent)}
+  #plannedList li.over{background:rgba(245,158,11,.12);border-color:var(--accent)}
+  .grip{color:var(--faint);line-height:1;margin-top:2px}
+  .tick{border:0;background:none;padding:0;margin-top:1px;font-size:13px;line-height:1.4;color:var(--faint);cursor:pointer}
+  .tick.on{color:var(--green);font-weight:700}
+  .ptxt{flex:1;line-height:1.45}
+  .ptxt .t{font-weight:600}
+  li.done .ptxt .t{color:var(--green);text-decoration:line-through}
+  .ptxt .c{color:var(--faint)}
+  .ptxt .d{color:var(--muted)}
+  .del{border:0;background:none;color:var(--faint);cursor:pointer;padding:2px 4px;border-radius:6px;font-size:13px}
+  .del:hover{color:var(--red);background:rgba(239,68,68,.12)}
+  .taskform{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;padding:12px;border:1px solid var(--border);background:var(--card2);border-radius:10px;margin-top:12px}
+  /* inputs */
+  label.fl{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;white-space:nowrap}
+  input,select,textarea{font:inherit;background:var(--input);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:7px 9px;width:100%}
+  input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--accent)}
+  .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .filterrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,.12);color:#b45309;border:1px solid rgba(245,158,11,.35);border-radius:999px;padding:3px 10px;font-size:12px}
+  html[data-theme="dark"] .chip{color:#fbbf24}
+  .chip button{border:0;background:none;color:inherit;cursor:pointer;font-size:13px;line-height:1}
+  .link{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;margin-left:auto;cursor:pointer;font:inherit}
+  /* table */
+  table{width:100%;border-collapse:collapse}
+  thead{background:var(--card2)}
+  th{text-align:left;padding:9px 12px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap}
+  th button{border:0;background:none;color:var(--fg);font:inherit;font-weight:700;display:inline-flex;gap:5px;align-items:center;cursor:pointer}
+  th button .ar{color:var(--faint);font-size:11px}
+  th button.active .ar{color:var(--accent)}
+  td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  tr.group{cursor:pointer}
+  tr.group:hover{background:var(--hover)}
+  tr.group.hl{background:rgba(245,158,11,.06)}
+  tr.item{background:var(--card2)}
+  .cnt{display:inline-block;background:var(--chip-bg);color:var(--chip-fg);border-radius:999px;padding:2px 9px;font-size:11px;font-weight:600;margin-right:5px}
+  .cat{display:inline-block;background:var(--chip-bg);color:var(--chip-fg);border-radius:999px;padding:2px 9px;font-size:11px;margin:2px 4px 2px 0}
+  .cat.sel{background:rgba(245,158,11,.18);color:#b45309}
+  html[data-theme="dark"] .cat.sel{color:#fbbf24}
+  .src{display:block;font-size:11px;color:var(--accent);text-decoration:underline;text-underline-offset:2px;margin-top:3px;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tblhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .empty{text-align:center;color:var(--faint);padding:32px 12px}
+  .iconbtn{border:0;background:none;color:var(--muted);cursor:pointer;padding:5px 6px;border-radius:7px;font-size:14px}
+  .iconbtn:hover{background:var(--hover);color:var(--fg)}
+  .iconbtn.del:hover{color:var(--red);background:rgba(239,68,68,.12)}
+  .editgrid{display:grid;grid-template-columns:repeat(1,1fr);gap:12px}
+  @media(min-width:768px){.editgrid{grid-template-columns:repeat(3,1fr)}.span2{grid-column:span 2}}
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}
+  .ov.on{display:flex}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:22px;box-shadow:var(--shadow)}
+  .modal.sm{max-width:420px}
+  .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .mhead h2{margin:0;font-size:18px}
+  .x{border:0;background:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+  .f{margin-bottom:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .hint{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:6px}
+  .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+  .hidden{display:none !important}
+  /* custom picker (matches artifact UI) */
+  .picker{position:relative}
+  .pickbtn{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;background:var(--input);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:left;font:inherit}
+  .pickbtn .car{color:var(--muted);font-size:12px}
+  .pickmenu{position:absolute;left:0;right:0;top:calc(100% + 5px);z-index:80;max-height:300px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);padding:5px}
+  .pickhead{padding:7px 11px 5px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);position:sticky;top:0;background:var(--card)}
+  .pickitem{display:flex;width:100%;align-items:flex-start;gap:8px;border:0;background:none;color:var(--fg);padding:7px 11px;border-radius:7px;text-align:left;font:inherit;cursor:pointer;line-height:1.4}
+  .pickitem:hover{background:var(--hover)}
+  .pickitem .mk{flex-shrink:0;margin-top:1px;font-size:12px;color:var(--faint)}
+  .pickitem.done .mk{color:var(--green)}
+  .pickitem.done .nm{color:var(--green);font-weight:600}
+  .pickitem .meta{color:var(--faint);font-size:11px}
+  .pickmenu .sep{height:1px;background:var(--border);margin:5px 4px}
+  .alink{display:inline-block;background:none;border:0;padding:0;margin-top:7px;color:var(--accent);font:inherit;font-size:12px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .note-box{font-size:12px;color:var(--faint);text-align:center;padding:4px 0 24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar" id="topbar"></div>
+
+  <header class="app">
+    <div class="brand">
+      <div class="ico">&#128663;</div>
+      <div>
+        <h1>Historia Serwisowa</h1>
+        <p class="sub" id="modelName"></p>
+      </div>
+    </div>
+    <div class="tools">
+      <span class="saved" id="saved">Zapisano lokalnie &#10003;</span>
+      <button class="btn icon" id="themeBtn" title="Zmień motyw">&#9788;</button>
+      <div class="menuwrap">
+        <button class="btn" id="optBtn"><span class="cog">&#9881;</span> Opcje <span class="car">&#9662;</span></button>
+        <div class="menu hidden" id="optMenu">
+          <button data-act="exportJson">&#11015; Eksport danych (JSON)</button>
+          <button data-act="exportTxt">&#11015; Eksport historii (TXT)</button>
+          <label>&#11014; Import danych (JSON)<input type="file" id="importFile" accept="application/json" class="hidden" /></label>
+          <div class="sep"></div>
+          <button data-act="reset" class="danger">&#8634; Przywróć oryginalne dane</button>
+        </div>
+      </div>
+      <button class="btn primary" id="addBtn">+ Dodaj wpis</button>
+    </div>
+  </header>
+
+  <section class="card pad" id="plannedCard">
+    <div class="ttl">
+      <span>&#128295; Nadchodzące czynności</span>
+      <span class="note" id="plannedNote"></span>
+      <button class="btn sm" id="taskToggle" style="margin-left:auto">+ Dodaj zadanie</button>
+    </div>
+    <div class="taskform hidden" id="taskForm">
+      <div style="flex:1 1 200px"><label class="fl">Zadanie</label><input id="tfTitle" placeholder="np. Wymiana oleju Haldex" /></div>
+      <div style="width:130px"><label class="fl">Przy km</label><input id="tfMileage" type="number" placeholder="118000" /></div>
+      <div style="width:160px"><label class="fl">Do dnia</label><input id="tfDate" type="date" /></div>
+      <div style="flex:1 1 170px"><label class="fl">Uwagi</label><input id="tfDesc" /></div>
+      <button class="btn primary" id="tfAdd">Dodaj</button>
+      <button class="btn" id="tfCancel">Anuluj</button>
+    </div>
+    <ul id="plannedList"></ul>
+  </section>
+
+  <section class="card pad">
+    <div class="ttl">&#9662; Filtry</div>
+    <div class="grid4" style="margin-top:12px">
+      <div><label class="fl">Data od</label><input type="date" id="fDateFrom" /></div>
+      <div><label class="fl">Data do</label><input type="date" id="fDateTo" /></div>
+      <div><label class="fl">Przebieg od (km)</label><input type="number" id="fKmFrom" placeholder="0" /></div>
+      <div><label class="fl">Przebieg do (km)</label><input type="number" id="fKmTo" placeholder="999999" /></div>
+    </div>
+    <div class="filterrow">
+      <div class="menuwrap">
+        <button class="btn sm" id="catBtn">Kategorie &#9662;</button>
+        <div class="menu hidden" id="catMenu" style="max-height:300px;overflow:auto;left:0;right:auto"></div>
+      </div>
+      <div class="chips" id="catChips"></div>
+      <button class="link" id="clearF">Wyczyść filtry</button>
+    </div>
+  </section>
+
+  <section class="card" style="overflow:hidden">
+    <div class="tblhead">
+      <strong id="visitCount"></strong>
+      <button class="btn sm" id="expandAll">Rozwiń wszystkie</button>
+    </div>
+    <div style="overflow-x:auto"><table id="tbl">
+      <thead><tr>
+        <th style="width:34px"></th>
+        <th><button data-sort="date">Data <span class="ar">&#8645;</span></button></th>
+        <th><button data-sort="mileage">Przebieg <span class="ar">&#8645;</span></button></th>
+        <th>Pozycje / Szczegóły</th>
+        <th><button data-sort="cost">Koszt <span class="ar">&#8645;</span></button></th>
+        <th style="text-align:right">Akcje</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+  </section>
+
+  <p class="note-box">Dane zapisują się automatycznie w tej przeglądarce (localStorage). Użyj „Opcje &rarr; Eksport”, aby zrobić kopię zapasową.</p>
+</div>
+
+<!-- ADD ENTRY MODAL -->
+<div class="ov" id="ovAdd">
+  <div class="modal">
+    <div class="mhead"><h2>Dodaj wpis serwisowy</h2><button class="x" data-close="ovAdd">&#10005;</button></div>
+    <div class="grid2 f">
+      <div><label class="fl">Data</label><input type="date" id="mDate" /></div>
+      <div>
+        <label class="fl">Przebieg (km)</label><input type="number" id="mMileage" />
+        <label class="hint"><input type="checkbox" id="mApprox" /> przebieg szacunkowy</label>
+      </div>
+    </div>
+    <div class="f" id="mPickBlock">
+      <label class="fl">Czynność serwisowa</label>
+      <div class="picker">
+        <button type="button" class="pickbtn" id="mPickBtn"><span id="mPickLabel">&mdash; wybierz &mdash;</span><span class="car">&#9662;</span></button>
+        <div class="pickmenu hidden" id="mPickMenu"></div>
+      </div>
+      <label class="hint hidden" id="mRemoveWrap"><input type="checkbox" id="mRemove" checked /> Usuń tę pozycję z listy nadchodzących czynności po zapisaniu</label>
+      <button type="button" class="alink" id="mCustomOn">Wpisz własną nazwę / kategorię</button>
+    </div>
+    <div class="f hidden" id="mCustomWrap">
+      <label class="fl">Nazwa czynności</label><input id="mTitle2" placeholder="Nazwa czynności (tytuł)" />
+      <label class="fl" style="margin-top:10px">Własna kategoria</label><input id="mCustomCat" placeholder="np. Zawieszenie" />
+      <button type="button" class="alink" id="mCustomOff">Wybierz z listy gotowych</button>
+    </div>
+    <input type="hidden" id="mTitle" /><input type="hidden" id="mCat" />
+    <div class="f"><label class="fl">Opis (opcjonalnie)</label><textarea id="mDesc" rows="2"></textarea></div>
+    <div class="grid2 f">
+      <div><label class="fl">Koszt (opcjonalnie)</label><input id="mCost" placeholder="np. 250 zł" /></div>
+      <div><label class="fl">Źródło / link (opcjonalnie)</label><input id="mSrc" placeholder="https://..." /></div>
+    </div>
+    <div class="f">
+      <label class="fl">Status</label>
+      <label class="hint"><input type="radio" name="mStatus" value="completed" checked /> Wykonane</label>
+      <label class="hint"><input type="radio" name="mStatus" value="planned" /> Planowane</label>
+    </div>
+    <button class="btn primary" id="mSave" style="width:100%;justify-content:center;padding:11px">Zapisz wpis</button>
+  </div>
+</div>
+
+<!-- RESET MODAL -->
+<div class="ov" id="ovReset">
+  <div class="modal sm">
+    <h2 style="margin:0 0 8px;font-size:18px">Przywrócić oryginalne dane?</h2>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 16px">Spowoduje to trwałe usunięcie wszystkich zmian zapisanych lokalnie i przywrócenie pierwotnej listy wpisów. Tej operacji nie można cofnąć. Jeśli chcesz zachować bieżące dane, najpierw użyj opcji „Eksport danych”.</p>
+    <div class="foot">
+      <button class="btn" data-close="ovReset">Anuluj</button>
+      <button class="btn danger" id="doReset" style="border-color:rgba(239,68,68,.4)">Przywróć oryginalne</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+var SEED = {"vehicle":{"model":"SEAT Leon Cupra 5F DSG 300KM (CJXC)"},"categories":["Olej silnikowy","Filtr oleju","Filtr powietrza","Filtr kabinowy","Płyn chłodniczy / Chłodzenie","Płyn hamulcowy","Tarcze hamulcowe przód","Tarcze hamulcowe tył","Klocki hamulcowe","Świece zapłonowe","Olej DSG","Olej mechanizm różnicowy","Opony / Koła","Zawieszenie / Geometria","Akumulator","Klimatyzacja","Diagnostyka / Naprawa","Przegląd","Karoseria / Lakier","Inne","Planowane"],"entryTemplates":[{"label":"Wymiana oleju silnikowego","category":"Olej silnikowy"},{"label":"Wymiana filtra oleju","category":"Filtr oleju"},{"label":"Wymiana filtra powietrza","category":"Filtr powietrza"},{"label":"Wymiana filtra kabinowego","category":"Filtr kabinowy"},{"label":"Wymiana płynu chłodzącego","category":"Płyn chłodniczy / Chłodzenie"},{"label":"Wymiana płynu hamulcowego","category":"Płyn hamulcowy"},{"label":"Wymiana tarcz hamulcowych przód","category":"Tarcze hamulcowe przód"},{"label":"Wymiana tarcz hamulcowych tył","category":"Tarcze hamulcowe tył"},{"label":"Wymiana klocków hamulcowych","category":"Klocki hamulcowe"},{"label":"Wymiana świec zapłonowych","category":"Świece zapłonowe"},{"label":"Wymiana oleju DSG","category":"Olej DSG"},{"label":"Wymiana opon / kół","category":"Opony / Koła"},{"label":"Geometria / zbieżność","category":"Zawieszenie / Geometria"},{"label":"Przegląd okresowy","category":"Przegląd"},{"label":"Diagnostyka / naprawa","category":"Diagnostyka / Naprawa"},{"label":"Inne","category":"Inne"}],"entries":[{"id":1,"date":"2018-03-12","mileage":14975,"mileageApprox":false,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers XF LongLife 5W30 VW504/507","cost":null,"source":null,"status":"completed"},{"id":2,"date":"2018-03-19","mileage":15100,"mileageApprox":false,"category":"Płyn chłodniczy / Chłodzenie","title":"Wymiana obudowy termostatu","description":"Pierwsza wymiana obudowy termostatu","cost":null,"source":null,"status":"completed"},{"id":3,"date":"2018-03-19","mileage":15100,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Wymiana sondy lambda","description":null,"cost":null,"source":null,"status":"completed"},{"id":4,"date":"2019-02-25","mileage":30000,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju - przegląd 30k","description":"Millers 5W40 XF LongLife","cost":null,"source":null,"status":"completed"},{"id":5,"date":"2019-02-25","mileage":30000,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"Przegląd 30k","cost":null,"source":null,"status":"completed"},{"id":6,"date":"2019-02-25","mileage":30000,"mileageApprox":true,"category":"Filtr powietrza","title":"Wymiana filtra powietrza (na żądanie)","description":"Mann/Knecht 292x177x70","cost":null,"source":null,"status":"completed"},{"id":7,"date":"2020-02-21","mileage":42000,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers 5W40 XF LongLife","cost":null,"source":null,"status":"completed"},{"id":8,"date":"2020-02-21","mileage":42000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Diagnoza cieknącego termostatu","description":"Problem cieknącego termostatu - druga diagnoza, wymiana zaplanowana na później","cost":null,"source":null,"status":"completed"},{"id":9,"date":"2020-02-26","mileage":42000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Wymiana obudowy termostatu (drugi raz)","description":null,"cost":null,"source":null,"status":"completed"},{"id":10,"date":"2020-06-12","mileage":null,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Błędy komputera i zatrzymanie samochodu","description":"Brak reakcji gazu, po zatrzymaniu ponowne uruchomienie bez błędów. W trakcie jazdy kilka razy skoczyła wskazówka obrotomierza do zera. Wizyta w serwisie - skasowanie błędów (bez procedur), zalecenie obserwacji.","cost":null,"source":null,"status":"completed"},{"id":11,"date":"2020-07-22","mileage":33091,"mileageApprox":false,"category":"Opony / Koła","title":"Założenie opon letnich","description":"Opony letnie PS4s","cost":null,"source":null,"status":"completed"},{"id":12,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Tarcze hamulcowe tył","title":"Wymiana tarcz tył - przegląd 60k","description":"ATE 310mm 7kg, nr kat. 24.0122-0219.1","cost":null,"source":null,"status":"completed"},{"id":13,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Klocki hamulcowe","title":"Wymiana klocków - przegląd 60k","description":"EBC Yellow","cost":null,"source":null,"status":"completed"},{"id":14,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego - przegląd 60k","description":"DOT 4 Motul RBF 600, stalowy oplot z PizzaBrakes","cost":null,"source":null,"status":"completed"},{"id":15,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Filtr powietrza","title":"Wymiana filtra powietrza - przegląd 60k","description":"MANN C30 005","cost":null,"source":null,"status":"completed"},{"id":16,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego - przegląd 60k","description":"Knecht LAK 888","cost":null,"source":null,"status":"completed"},{"id":17,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Filtr oleju","title":"Wymiana filtra oleju - przegląd 60k","description":"MANN HU 6013z","cost":null,"source":null,"status":"completed"},{"id":18,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Olej silnikowy","title":"Wymiana oleju silnikowego - przegląd 60k","description":"Millers 5W40 Energy Efficience","cost":null,"source":null,"status":"completed"},{"id":19,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Olej DSG","title":"Wymiana oleju DSG - przegląd 60k","description":"Olej oryginalny","cost":null,"source":null,"status":"completed"},{"id":20,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Olej mechanizm różnicowy","title":"Wymiana oleju w mechanizmie różnicowym","description":"Olej oryginalny","cost":null,"source":null,"status":"completed"},{"id":21,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Świece zapłonowe","title":"Wymiana świec zapłonowych - przegląd 60k","description":"4x NGK 94833 PLFER7A8EG","cost":null,"source":null,"status":"completed"},{"id":22,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Akumulator","title":"Naładowanie akumulatora","description":"Było 345/360","cost":null,"source":null,"status":"completed"},{"id":23,"date":"2021-09-02","mileage":60000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Naprawa wycieku płynu chłodniczego","description":"Wymieniona część (prawdopodobnie pompa)","cost":"1185 zł, -90% = 121 zł","source":null,"status":"completed"},{"id":24,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Przegląd","title":"Przegląd okresowy","description":"Serwis bez części własnych","cost":"1218,78 zł","source":null,"status":"completed"},{"id":25,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Tarcze hamulcowe przód","title":"Wymiana tarcz przód","description":"EBC 340mm, EBC BSD1877","cost":"958 zł","source":"https://tomson.com.pl/product-pol-5042-Tarcze-hamulcowe-EBC-BSD1877-Blade-Slot-Design-Audi-A3-S3-RS3-TT-TTS-VW-Golf-VII-GTi-VII-R-Octavia-RS-340-mm-przod.html","status":"completed"},{"id":26,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Klocki hamulcowe","title":"Wymiana klocków przód","description":"EBC DP42127R","cost":"888 zł","source":"https://tomson.com.pl/product-pol-5043-Klocki-hamulcowe-EBC-DP42127R-Yellow-Stuff-Audi-S3-TT-TTS-VW-Golf-VII-GTi-VII-R-Octavia-RS-Seat-Leon-Cupra-przod.html","status":"completed"},{"id":27,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego","description":"TRW GP DOT 4, 1L (wymiana co 2 lata)","cost":"60 zł","source":"https://motostacja.com/p/TRW-PFB601/","status":"completed"},{"id":28,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers CFS NT","cost":null,"source":null,"status":"completed"},{"id":29,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"Knecht LAK 888","cost":"50 zł","source":null,"status":"completed"},{"id":30,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Zawieszenie / Geometria","title":"Geometria - zbieżność","description":"Lewy przód i prawy tył poza normami, wykonano w ASO","cost":"250 zł","source":null,"status":"completed"},{"id":31,"date":"2022-03-22","mileage":null,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła letnie","description":"PP lekko krzywy od środka - założony na PT","cost":"130 zł netto / 159 zł brutto","source":null,"status":"completed"},{"id":32,"date":"2023-03-01","mileage":71000,"mileageApprox":true,"category":"Inne","title":"Wymiana wycieraczek przód + tył","description":"Bosch AeroTwin","cost":null,"source":null,"status":"completed"},{"id":33,"date":"2023-03-01","mileage":71000,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"Knecht LAK 888","cost":null,"source":null,"status":"completed"},{"id":34,"date":"2024-02-01","mileage":83800,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju - mały przegląd (TGE auto)","description":"Olej 5W40, płukanka silnika","cost":null,"source":null,"status":"completed"},{"id":35,"date":"2024-04-01","mileage":85461,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła letnie (Szmyt)","description":"PS4s - 5,5mm tył; 4mm przód","cost":null,"source":null,"status":"completed"},{"id":36,"date":"2024-04-15","mileage":85461,"mileageApprox":false,"category":"Filtr powietrza","title":"Wymiana filtra powietrza","description":"Mann C30 005","cost":null,"source":null,"status":"completed"},{"id":37,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Świece zapłonowe","title":"Wymiana świec zapłonowych (Maran)","description":"NGK 94833","cost":"1041 zł łącznie (bez robocizny i czyszczenia nadkoli)","source":null,"status":"completed"},{"id":38,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego (Maran)","description":"ATE typ 200 DOT 4","cost":null,"source":null,"status":"completed"},{"id":39,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Klimatyzacja","title":"Czyszczenie klimatyzacji","description":"Pakiet czyszczenia klimatyzacji","cost":"390 zł","source":null,"status":"completed"},{"id":40,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Inne","title":"Czyszczenie podszybia i nadkoli z liści","description":"Udrożnienie odpływów","cost":null,"source":null,"status":"completed"},{"id":41,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Klimatyzacja","title":"Naprawa wycieku z parownika","description":"Wymiana o-ringów","cost":null,"source":null,"status":"completed"},{"id":42,"date":"2024-06-01","mileage":87000,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego węglowego","description":"Knecht LAK888","cost":null,"source":null,"status":"completed"},{"id":43,"date":"2024-12-01","mileage":90000,"mileageApprox":true,"category":"Opony / Koła","title":"Wymiana na koła zimowe","description":"Nowe opony Nokian Snowproof P 225/45 R17. Problem z wyważeniem 2x tylnych opon (150N i 160N), poprawione przełożenie na feldze - wynik 60N i 65N. Renowacja felg.pl, Hunter test drogowy.","cost":"516 zł (renowacja felg)","source":null,"status":"completed"},{"id":44,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Przegląd","title":"Przegląd okresowy (EK Racing Gdańsk)","description":"Kielnieńska 174","cost":"150 zł","source":null,"status":"completed"},{"id":45,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Klimatyzacja","title":"Odgrzybianie klimatyzacji","description":null,"cost":"50 zł","source":null,"status":"completed"},{"id":46,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Podłączenie komputera diagnostycznego","description":null,"cost":"80 zł","source":null,"status":"completed"},{"id":47,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers C3 5W40 Nanodrive","cost":null,"source":null,"status":"completed"},{"id":48,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: skorodowane śruby łącznika wydechu","description":"Zaobserwowane podczas przeglądu EK Racing","cost":null,"source":null,"status":"completed"},{"id":49,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: pocą się amortyzatory przednie","description":"Zaobserwowane podczas przeglądu EK Racing","cost":null,"source":null,"status":"completed"},{"id":50,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: olej na przewodzie prawy przód z turbo","description":"Lekki wyciek oleju - obserwować","cost":null,"source":null,"status":"completed"},{"id":51,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: błąd komputera - katalizator","description":"Błąd zniknął po skasowaniu","cost":null,"source":null,"status":"completed"},{"id":52,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Płyn chłodniczy / Chłodzenie","title":"Uwaga: gęsty, brudny płyn chłodniczy","description":"Potencjalnie: wymiennik ciepła olej/płyn chłodzący lub uszczelka pod głowicą. Możliwa część: chłodniczka NIS90914 Nielsen, ok. 350 zł, ok. 4h robocizny na wymianę i płukanie układu.","cost":"~350 zł (część)","source":null,"status":"completed"},{"id":53,"date":"2025-04-04","mileage":null,"mileageApprox":false,"category":"Karoseria / Lakier","title":"Zgłoszenie rdzy - Gdańsk","description":null,"cost":null,"source":null,"status":"completed"},{"id":54,"date":"2025-05-01","mileage":97400,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"LAK888 Mann","cost":null,"source":null,"status":"completed"},{"id":55,"date":"2025-05-13","mileage":null,"mileageApprox":false,"category":"Karoseria / Lakier","title":"Ponowne zgłoszenie rdzy","description":"Tym razem skutecznie, z pomiarem grubości lakieru","cost":null,"source":null,"status":"completed"},{"id":56,"date":"2025-06-25","mileage":null,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"1sza wizyta w Auto Miras Gdańsk","description":"Diagnoza i kosztorys naprawy - olej w układzie chłodzącym","cost":null,"source":null,"status":"completed"},{"id":57,"date":"2025-07-16","mileage":98000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Naprawa układu chłodzenia (Auto Miras)","description":"Wymiana chłodnicy oleju + elementy towarzyszące + płukanie układu. Płyn chłodzący G12 evo (G12E050A2). Naprawa trwała 16.07.2025-25.07.2025.","cost":null,"source":null,"status":"completed"},{"id":58,"date":"2025-07-16","mileage":98000,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju (Auto Miras)","description":"Millers Energy Efficient C3 5W40 + filtr Filtron 688/2","cost":null,"source":null,"status":"completed"},{"id":59,"date":"2025-10-25","mileage":101645,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła zimowe","description":"Nokian WR Snowproof P 225/45 R17 (Pruszków, ul. Powstańców 3)","cost":"110 zł","source":null,"status":"completed"},{"id":60,"date":"2025-10-27","mileage":101822,"mileageApprox":false,"category":"Zawieszenie / Geometria","title":"Geometria - zbieżność przód/tył","description":"Raszyn","cost":"300 zł","source":null,"status":"completed"},{"id":61,"date":"2026-04-17","mileage":null,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła letnie (Pruszków)","description":"Lewa tylna felga lekko skrzywiona wewnętrznie, reszta w normie","cost":null,"source":null,"status":"completed"},{"id":62,"date":"2026-06-30","mileage":107500,"mileageApprox":true,"category":"Inne","title":"Wymiana pompki spryskiwacza szyb","description":"Topran 107 819 HP","cost":null,"source":null,"status":"completed"},{"id":63,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju - przegląd (EK Racing Gdańsk)","description":"Millers 5W40 NanoDrive, Kielnieńska 174","cost":"220 zł robocizna (przegląd + wymiana oleju i filtra)","source":null,"status":"completed"},{"id":64,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego (EK Racing Gdańsk)","description":"Ate typ 200 DOT 4, nr 03.9901-6212","cost":"140 zł robocizna","source":null,"status":"completed"},{"id":65,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Tarcze hamulcowe tył","title":"Wymiana tarcz tył (EK Racing Gdańsk)","description":"Brembo 310mm, nr 09.A200.11","cost":"220 zł robocizna (tarcze+klocki)","source":null,"status":"completed"},{"id":66,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Klocki hamulcowe","title":"Wymiana klocków tył (EK Racing Gdańsk)","description":"EBC Green Stuff DP22173","cost":null,"source":null,"status":"completed"},{"id":67,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Diagnostyka / Naprawa","title":"Odczyt błędów i zapis przeglądu","description":"Procedura hamulca ręcznego elektrycznego do wymiany tarcz i klocków","cost":"100 zł + 80 zł (procedura hamulca)","source":null,"status":"completed"},{"id":68,"date":"2026-07-27","mileage":108000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Wymiana nagrzewnicy (EK Racing Gdańsk)","description":"Nissen 73980. Płukanie układu chłodzenia Liqui Moly Kuhler Reiniger. Nowy płyn chłodniczy G12 evo.","cost":null,"source":null,"status":"completed"},{"id":69,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Płukanka do chłodnicy","description":"Liqui Moly 2699 300ml","cost":"40 zł","source":"https://zmienolej.pl/dodatki/3723-plukanka-do-chlodnic-liqui-moly-2699-300ml-4100420026997.html","status":"planned","done":false},{"id":70,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Płyn chłodniczy G12","description":"Potrzebne 8L, 2x5L VW/Audi/Skoda/Seat OE","cost":"180 zł (2x5L)","source":"https://allegro.pl/oferta/plyn-chlodniczy-g12-5l-vw-audi-skoda-seat-oe-14795655783","status":"planned","done":false},{"id":71,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Zbiornik wyrównawczy","description":"Bez krzemionki - lepiej nie brać najtańszego","cost":"70-100 zł","source":null,"status":"planned","done":false},{"id":72,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Obejma wydechu","description":null,"cost":null,"source":null,"status":"planned","done":false},{"id":73,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Naprawa skorodowanych śrub łącznika wydechu","description":null,"cost":null,"source":null,"status":"planned","done":false},{"id":74,"date":null,"mileage":118000,"mileageApprox":false,"category":"Planowane","title":"Wymiana oleju + filtr (planowana)","description":"Interwał 10 tys. km","cost":null,"source":null,"status":"planned","done":false},{"id":75,"date":null,"mileage":114000,"mileageApprox":false,"category":"Planowane","title":"Wymiana oleju Haldex (planowana)","description":"Poprzednia wymiana przy 54k km","cost":null,"source":null,"status":"planned","done":false},{"id":76,"date":null,"mileage":114000,"mileageApprox":false,"category":"Planowane","title":"Wymiana oleju DSG (planowana)","description":"Poprzednia wymiana przy 54k km","cost":null,"source":null,"status":"planned","done":false},{"id":77,"date":null,"mileage":125700,"mileageApprox":false,"category":"Planowane","title":"Wymiana świec zapłonowych (planowana)","description":"NGK","cost":null,"source":null,"status":"planned","done":false},{"id":78,"date":"2028-07-01","mileage":null,"mileageApprox":false,"category":"Planowane","title":"Wymiana płynu hamulcowego (planowana)","description":null,"cost":null,"source":null,"status":"planned","done":false},{"id":79,"date":null,"mileage":100000,"mileageApprox":false,"category":"Planowane","title":"Czyszczenie intercoolera/dolotu (planowane)","description":"Aby uniknąć osadu olejowego (maślanki)","cost":null,"source":null,"status":"planned","done":false},{"id":80,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Wymiana rozrządu (warunkowa)","description":"Dopiero gdy pojawią się niepokojące dźwięki","cost":null,"source":null,"status":"planned","done":false}]};
+
+var K_ENTRIES='csh:entries', K_ORDER='csh:order', K_THEME='csh:theme';
+var VEHICLE=SEED.vehicle, CATS=SEED.categories, TPL=SEED.entryTemplates;
+
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function load(k,f){try{var r=localStorage.getItem(k);if(r){var p=JSON.parse(r);if(p)return p;}}catch(e){}return f;}
+var entries = load(K_ENTRIES, null) || clone(SEED.entries);
+var order   = load(K_ORDER, null)   || entries.filter(function(e){return e.status==='planned';}).map(function(e){return e.id;});
+var theme   = (function(){try{var t=localStorage.getItem(K_THEME);return t==='light'||t==='dark'?t:'dark';}catch(e){return 'dark';}})();
+var nextId  = Math.max.apply(null, entries.map(function(e){return e.id;}).concat([0])) + 1;
+
+var sortKey='date', sortDir='desc', expanded={}, editingId=null, selCats=[], pickedPlannedId=null;
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fmtDate(d){if(!d)return '\u2014';var p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
+function fmtKm(m,a){if(m==null)return '\u2014';return m.toLocaleString('pl-PL')+' km'+(a?' (szac.)':'');}
+function parseCost(c){if(!c)return 0;var m=String(c).match(/[\d]+([.,]\d+)?/);return m?parseFloat(m[0].replace(',','.')):0;}
+
+var saveT;
+function save(){
+  try{localStorage.setItem(K_ENTRIES,JSON.stringify(entries));localStorage.setItem(K_ORDER,JSON.stringify(order));}catch(e){}
+  var s=$('saved'); s.classList.add('on'); clearTimeout(saveT); saveT=setTimeout(function(){s.classList.remove('on');},1300);
+}
+function applyTheme(){document.documentElement.setAttribute('data-theme',theme);$('themeBtn').innerHTML= theme==='dark'?'&#9788;':'&#9789;';try{localStorage.setItem(K_THEME,theme);}catch(e){}}
+
+/* ---------- data helpers ---------- */
+function plannedOrdered(){
+  var map={},res=[],rest=[];
+  entries.forEach(function(e){if(e.status==='planned')map[e.id]=e;});
+  order.forEach(function(id){if(map[id]){res.push(map[id]);delete map[id];}});
+  for(var k in map) rest.push(map[k]);
+  return res.concat(rest);
+}
+function filtered(){
+  var df=$('fDateFrom').value, dt=$('fDateTo').value, kf=$('fKmFrom').value, kt=$('fKmTo').value;
+  return entries.filter(function(e){
+    if(e.status!=='completed')return false;
+    if(df&&(!e.date||e.date<df))return false;
+    if(dt&&(!e.date||e.date>dt))return false;
+    if(kf&&(e.mileage==null||e.mileage<+kf))return false;
+    if(kt&&(e.mileage==null||e.mileage>+kt))return false;
+    if(selCats.length&&selCats.indexOf(e.category)<0)return false;
+    return true;
+  });
+}
+function groups(){
+  var f=filtered(),map={},arr=[];
+  f.forEach(function(e){
+    var k=(e.date||'brak')+'|'+(e.mileage==null?'brak':e.mileage);
+    if(!map[k]){map[k]={key:k,date:e.date,mileage:e.mileage,approx:e.mileageApprox,items:[]};arr.push(map[k]);}
+    map[k].items.push(e);
+  });
+  arr.sort(function(a,b){
+    var av,bv;
+    if(sortKey==='date'){av=a.date||'';bv=b.date||'';}
+    else if(sortKey==='mileage'){av=a.mileage==null?-1:a.mileage;bv=b.mileage==null?-1:b.mileage;}
+    else{av=a.items.reduce(function(s,i){return s+parseCost(i.cost);},0);bv=b.items.reduce(function(s,i){return s+parseCost(i.cost);},0);}
+    if(av<bv)return sortDir==='asc'?-1:1;
+    if(av>bv)return sortDir==='asc'?1:-1;
+    return 0;
+  });
+  return arr;
+}
+
+/* ---------- render ---------- */
+function renderTop(){
+  var dates=entries.map(function(e){return e.date;}).filter(Boolean).sort();
+  var done=entries.filter(function(e){return e.status==='completed'&&e.mileage!=null;});
+  var km=done.length?Math.max.apply(null,done.map(function(e){return e.mileage;})):null;
+  $('topbar').innerHTML=
+    '<span>&#128663; '+esc(VEHICLE.model)+'</span><span style="opacity:.4">&bull;</span>'+
+    '<span>Wpisów: <b>'+entries.length+'</b></span><span style="opacity:.4">&bull;</span>'+
+    '<span>Zakres dat: <b>'+(dates.length?fmtDate(dates[0])+' \u2013 '+fmtDate(dates[dates.length-1]):'\u2014')+'</b></span><span style="opacity:.4">&bull;</span>'+
+    '<span>Przebieg: <b>'+(km!=null?km.toLocaleString('pl-PL')+' km':'\u2014')+'</b></span><span style="opacity:.4">&bull;</span>'+
+    '<span>Wyświetlane: <b>'+filtered().length+'</b>/'+entries.length+'</span>';
+  $('modelName').textContent=VEHICLE.model;
+}
+function renderPlanned(){
+  var list=plannedOrdered(), ul=$('plannedList'), h='';
+  $('plannedNote').textContent='('+list.filter(function(e){return e.done;}).length+'/'+list.length+' wykonane \u00b7 przeciągnij, aby zmienić kolejność)';
+  if(!list.length){ul.innerHTML='<li style="border:0;background:none;color:var(--faint);cursor:default">Brak zaplanowanych czynności.</li>';return;}
+  list.forEach(function(e,i){
+    var d = e.mileage!=null ? 'przy '+e.mileage.toLocaleString('pl-PL')+' km' : (e.date?'do '+fmtDate(e.date):'');
+    h+='<li draggable="true" data-i="'+i+'" data-id="'+e.id+'" class="'+(e.done?'done':'')+'">'+
+       '<span class="grip">&#8942;&#8942;</span>'+
+       '<button class="tick '+(e.done?'on':'')+'" data-tick="'+e.id+'" title="Oznacz jako wykonane">'+(e.done?'&#10003;':'&#9711;')+'</button>'+
+       '<span class="ptxt"><span class="t">'+esc(e.title)+'</span> <span class="c">\u00b7 '+esc(e.category)+'</span>'+
+       (d?' <span class="d">\u2014 '+esc(d)+'</span>':(e.description?' <span class="d">\u2014 '+esc(e.description)+'</span>':''))+'</span>'+
+       '<button class="del" data-delid="'+e.id+'" title="Usuń zadanie">&#128465;</button></li>';
+  });
+  ul.innerHTML=h;
+}
+function renderCats(){
+  $('catBtn').innerHTML='Kategorie'+(selCats.length?' ('+selCats.length+')':'')+' &#9662;';
+  $('catChips').innerHTML=selCats.map(function(c){return '<span class="chip">'+esc(c)+'<button data-uncat="'+esc(c)+'">&#10005;</button></span>';}).join('');
+  $('catMenu').innerHTML=CATS.map(function(c){return '<label><input type="checkbox" data-cat="'+esc(c)+'"'+(selCats.indexOf(c)>=0?' checked':'')+' /> '+esc(c)+'</label>';}).join('');
+}
+function renderTable(){
+  var gs=groups(), h='';
+  $('visitCount').textContent='Historia serwisowa \u2014 '+gs.length+' '+(gs.length===1?'wizyta':'wizyt');
+  var allOpen=gs.length>0&&gs.every(function(g){return expanded[g.key];});
+  $('expandAll').textContent=allOpen?'Zwiń wszystkie':'Rozwiń wszystkie';
+  if(!gs.length){$('tbody').innerHTML='<tr><td colspan="6" class="empty">Brak wpisów spełniających kryteria filtrów.</td></tr>';return;}
+  gs.forEach(function(g){
+    var open=!!expanded[g.key];
+    var sum=g.items.reduce(function(s,i){return s+parseCost(i.cost);},0);
+    var hl=g.items.some(function(i){return selCats.indexOf(i.category)>=0;});
+    h+='<tr class="group '+(hl?'hl':'')+'" data-g="'+esc(g.key)+'">'+
+       '<td style="text-align:center;color:var(--muted)">'+(open?'&#9662;':'&#9656;')+'</td>'+
+       '<td><strong>'+fmtDate(g.date)+'</strong></td>'+
+       '<td style="white-space:nowrap">'+fmtKm(g.mileage,g.approx)+'</td>'+
+       '<td><span class="cnt">'+g.items.length+' '+(g.items.length===1?'pozycja':'pozycje')+'</span>'+
+       g.items.slice(0,3).map(function(i){return '<span class="cat'+(selCats.indexOf(i.category)>=0?' sel':'')+'">'+esc(i.category)+'</span>';}).join('')+
+       (g.items.length>3?'<span style="color:var(--faint);font-size:11px">+'+(g.items.length-3)+'</span>':'')+'</td>'+
+       '<td style="white-space:nowrap">'+(sum>0?sum.toLocaleString('pl-PL')+' zł':'\u2014')+'</td>'+
+       '<td style="text-align:right;color:var(--faint);font-size:11px">'+(open?'zwiń':'rozwiń')+'</td></tr>';
+    if(open){
+      g.items.forEach(function(e){
+        if(editingId===e.id){
+          h+='<tr class="item"><td></td><td colspan="5"><div class="editgrid">'+
+            '<div><label class="fl">Data</label><input type="date" id="e_date" value="'+(e.date||'')+'" /></div>'+
+            '<div><label class="fl">Przebieg</label><input type="number" id="e_km" value="'+(e.mileage==null?'':e.mileage)+'" /><label class="hint"><input type="checkbox" id="e_ap"'+(e.mileageApprox?' checked':'')+' /> szacunkowy</label></div>'+
+            '<div><label class="fl">Kategoria</label><select id="e_cat">'+CATS.map(function(c){return '<option'+(c===e.category?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select></div>'+
+            '<div class="span2"><label class="fl">Czynność</label><input id="e_title" value="'+esc(e.title)+'" /></div>'+
+            '<div><label class="fl">Koszt</label><input id="e_cost" value="'+esc(e.cost||'')+'" /></div>'+
+            '<div class="span2"><label class="fl">Opis</label><textarea id="e_desc" rows="2">'+esc(e.description||'')+'</textarea></div>'+
+            '<div><label class="fl">Status</label><select id="e_st"><option value="completed"'+(e.status==='completed'?' selected':'')+'>wykonane</option><option value="planned"'+(e.status==='planned'?' selected':'')+'>planowane</option></select></div>'+
+            '</div><div class="foot" style="justify-content:flex-start;margin-top:12px">'+
+            '<button class="btn sm" data-saveedit="'+e.id+'" style="color:var(--green)">&#10003; Zapisz</button>'+
+            '<button class="btn sm" data-canceledit="1">&#10005; Anuluj</button></div></td></tr>';
+        }else{
+          h+='<tr class="item"><td></td>'+
+            '<td><span class="cat'+(selCats.indexOf(e.category)>=0?' sel':'')+'">'+esc(e.category)+'</span></td>'+
+            '<td><strong>'+esc(e.title)+'</strong></td>'+
+            '<td style="color:var(--muted);max-width:420px">'+esc(e.description||'\u2014')+
+            (e.source?'<a class="src" href="'+esc(e.source)+'" target="_blank" rel="noreferrer">źródło / link</a>':'')+'</td>'+
+            '<td style="white-space:nowrap">'+esc(e.cost||'\u2014')+'</td>'+
+            '<td style="text-align:right;white-space:nowrap"><button class="iconbtn" data-edit="'+e.id+'" title="Edytuj">&#9998;</button>'+
+            '<button class="iconbtn del" data-delid="'+e.id+'" title="Usuń">&#128465;</button></td></tr>';
+        }
+      });
+    }
+  });
+  $('tbody').innerHTML=h;
+  var ths=document.querySelectorAll('th button[data-sort]');
+  for(var i=0;i<ths.length;i++){ths[i].classList.toggle('active',ths[i].getAttribute('data-sort')===sortKey);}
+}
+function renderAll(){renderTop();renderPlanned();renderCats();renderTable();}
+
+/* ---------- planned actions ---------- */
+function toggleDone(id){entries.forEach(function(e){if(e.id===id)e.done=!e.done;});save();renderPlanned();}
+function removeEntry(id){entries=entries.filter(function(e){return e.id!==id;});order=order.filter(function(o){return o!==id;});save();renderAll();}
+
+/* ---------- export / import ---------- */
+function dl(blob,name){var u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);}
+function today(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+function exportJson(){dl(new Blob([JSON.stringify({entries:entries,plannedOrder:order},null,2)],{type:'application/json'}),'historia-serwisowa-'+today()+'.json');}
+function exportTxt(){
+  var c=entries.filter(function(e){return e.status==='completed';}).sort(function(a,b){
+    var ad=a.date||'',bd=b.date||'';if(ad!==bd)return ad<bd?-1:1;return (a.mileage==null?-1:a.mileage)-(b.mileage==null?-1:b.mileage);});
+  var L=['HISTORIA SERWISOWA - '+VEHICLE.model,'Wygenerowano: '+new Date().toLocaleDateString('pl-PL'),'Liczba wpisów: '+c.length,new Array(71).join('='),''];
+  c.forEach(function(e,i){
+    L.push((i+1)+'. '+fmtDate(e.date)+(e.mileage!=null?'  |  '+fmtKm(e.mileage,e.mileageApprox):''));
+    L.push('   Kategoria: '+e.category);
+    L.push('   Czynność: '+e.title);
+    if(e.description)L.push('   Opis: '+e.description);
+    if(e.cost)L.push('   Koszt: '+e.cost);
+    if(e.source)L.push('   Źródło: '+e.source);
+    L.push('');
+  });
+  dl(new Blob([L.join('\n')],{type:'text/plain;charset=utf-8'}),'historia-serwisowa-'+today()+'.txt');
+}
+
+/* ---------- modal ---------- */
+function fillPick(){
+  var list=plannedOrdered(), done=list.filter(function(e){return e.done;}), rest=list.filter(function(e){return !e.done;});
+  var h='';
+  if(list.length){
+    h+='<div class="pickhead">Z listy nadchodzących czynności</div>';
+    done.concat(rest).forEach(function(e){
+      var d=e.mileage!=null?e.mileage.toLocaleString('pl-PL')+' km':(e.date?fmtDate(e.date):'');
+      h+='<button type="button" class="pickitem'+(e.done?' done':'')+'" data-pick="p'+e.id+'">'+
+         '<span class="mk">'+(e.done?'&#10003;':'&#9711;')+'</span>'+
+         '<span class="nm">'+esc(e.title)+(d?' <span class="meta">\u00b7 '+esc(d)+'</span>':'')+'</span></button>';
+    });
+    h+='<div class="sep"></div>';
+  }
+  h+='<div class="pickhead">Szablony czynności</div>';
+  h+=TPL.map(function(t,i){return '<button type="button" class="pickitem" data-pick="t'+i+'"><span class="mk">&#43;</span><span class="nm">'+esc(t.label)+'</span></button>';}).join('');
+  $('mPickMenu').innerHTML=h;
+}
+function setCustomMode(on){
+  $('mCustomWrap').classList.toggle('hidden',!on);
+  $('mPickBlock').classList.toggle('hidden',on);
+  if(on){$('mPickMenu').classList.add('hidden');}
+}
+function openAdd(){
+  fillPick();
+  ['mDate','mMileage','mDesc','mCost','mSrc','mCustomCat','mTitle','mTitle2','mCat'].forEach(function(i){$(i).value='';});
+  $('mApprox').checked=false;$('mRemove').checked=true;$('mRemoveWrap').classList.add('hidden');
+  $('mPickLabel').innerHTML='&mdash; wybierz &mdash;';$('mPickLabel').style.color='';
+  $('mPickMenu').classList.add('hidden');setCustomMode(false);pickedPlannedId=null;
+  document.querySelector('input[name=mStatus][value=completed]').checked=true;
+  $('ovAdd').classList.add('on');
+}
+$('mPickBtn').addEventListener('click',function(e){e.stopPropagation();$('mPickMenu').classList.toggle('hidden');});
+$('mPickMenu').addEventListener('click',function(e){
+  e.stopPropagation();
+  var b=e.target.closest('[data-pick]');if(!b)return;
+  var v=b.getAttribute('data-pick');
+  pickedPlannedId=null;$('mRemoveWrap').classList.add('hidden');$('mPickLabel').style.color='';
+  if(v.charAt(0)==='p'){
+    var id=+v.slice(1),t=null;entries.forEach(function(x){if(x.id===id)t=x;});
+    if(!t)return;
+    pickedPlannedId=id;$('mRemoveWrap').classList.remove('hidden');
+    $('mTitle').value=t.title;
+    $('mCat').value=(CATS.indexOf(t.category)>=0&&t.category!=='Planowane')?t.category:'Inne';
+    if(t.description)$('mDesc').value=t.description;
+    if(t.mileage!=null)$('mMileage').value=t.mileage;
+    if(t.date)$('mDate').value=t.date;
+    if(t.source)$('mSrc').value=t.source;
+    document.querySelector('input[name=mStatus][value=completed]').checked=true;
+    $('mPickLabel').innerHTML=(t.done?'&#10003; ':'')+esc(t.title);
+    if(t.done)$('mPickLabel').style.color='var(--green)';
+  }else{
+    var tp=TPL[+v.slice(1)];
+    $('mTitle').value=tp.label;$('mCat').value=tp.category;
+    $('mPickLabel').textContent=tp.label;
+  }
+  $('mPickMenu').classList.add('hidden');
+});
+$('mCustomOn').addEventListener('click',function(){setCustomMode(true);pickedPlannedId=null;$('mRemoveWrap').classList.add('hidden');});
+$('mCustomOff').addEventListener('click',function(){setCustomMode(false);});
+$('mSave').addEventListener('click',function(){
+  var custom=!$('mCustomWrap').classList.contains('hidden');
+  var cat=custom?($('mCustomCat').value.trim()||'Inne'):($('mCat').value||'Inne');
+  var title=(custom?$('mTitle2').value.trim():$('mTitle').value.trim())||cat;
+  var st=document.querySelector('input[name=mStatus]:checked').value;
+  var e={id:nextId++,date:$('mDate').value||null,mileage:$('mMileage').value?+$('mMileage').value:null,
+    mileageApprox:$('mApprox').checked,category:cat,title:title,description:$('mDesc').value.trim()||null,
+    cost:$('mCost').value.trim()||null,source:$('mSrc').value.trim()||null,status:st,done:false};
+  entries.unshift(e);
+  if(st==='planned')order.push(e.id);
+  if(pickedPlannedId!=null&&$('mRemove').checked&&st==='completed'){
+    var pid=pickedPlannedId;
+    entries=entries.filter(function(x){return x.id!==pid;});
+    order=order.filter(function(o){return o!==pid;});
+  }
+  save();renderAll();$('ovAdd').classList.remove('on');
+});
+
+/* ---------- events ---------- */
+$('themeBtn').addEventListener('click',function(){theme=theme==='dark'?'light':'dark';applyTheme();});
+$('optBtn').addEventListener('click',function(e){e.stopPropagation();$('optMenu').classList.toggle('hidden');});
+$('catBtn').addEventListener('click',function(e){e.stopPropagation();$('catMenu').classList.toggle('hidden');});
+document.addEventListener('click',function(){$('optMenu').classList.add('hidden');$('catMenu').classList.add('hidden');});
+$('optMenu').addEventListener('click',function(e){e.stopPropagation();
+  var a=e.target.closest('[data-act]');if(!a)return;
+  var k=a.getAttribute('data-act');$('optMenu').classList.add('hidden');
+  if(k==='exportJson')exportJson();else if(k==='exportTxt')exportTxt();else if(k==='reset')$('ovReset').classList.add('on');
+});
+$('catMenu').addEventListener('click',function(e){e.stopPropagation();});
+$('catMenu').addEventListener('change',function(e){
+  var c=e.target.getAttribute('data-cat');if(!c)return;
+  if(e.target.checked){if(selCats.indexOf(c)<0)selCats.push(c);}else{selCats=selCats.filter(function(x){return x!==c;});}
+  renderCats();renderTable();renderTop();
+});
+$('catChips').addEventListener('click',function(e){
+  var c=e.target.getAttribute('data-uncat');if(!c)return;
+  selCats=selCats.filter(function(x){return x!==c;});renderCats();renderTable();renderTop();
+});
+['fDateFrom','fDateTo','fKmFrom','fKmTo'].forEach(function(id){$(id).addEventListener('input',function(){renderTable();renderTop();});});
+$('clearF').addEventListener('click',function(){
+  ['fDateFrom','fDateTo','fKmFrom','fKmTo'].forEach(function(i){$(i).value='';});
+  selCats=[];renderCats();renderTable();renderTop();
+});
+$('importFile').addEventListener('change',function(){
+  var f=this.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){try{
+    var p=JSON.parse(r.result);
+    if(p&&p.entries&&p.entries.length){
+      entries=p.entries;
+      order=p.plannedOrder||entries.filter(function(e){return e.status==='planned';}).map(function(e){return e.id;});
+      nextId=Math.max.apply(null,entries.map(function(e){return e.id;}).concat([0]))+1;
+      save();renderAll();
+    }
+  }catch(err){alert('Nie udało się wczytać pliku - nieprawidłowy format.');}};
+  r.readAsText(f);this.value='';
+});
+$('addBtn').addEventListener('click',openAdd);
+$('doReset').addEventListener('click',function(){
+  entries=clone(SEED.entries);
+  order=entries.filter(function(e){return e.status==='planned';}).map(function(e){return e.id;});
+  nextId=Math.max.apply(null,entries.map(function(e){return e.id;}).concat([0]))+1;
+  save();renderAll();$('ovReset').classList.remove('on');
+});
+document.addEventListener('click',function(e){
+  var c=e.target.getAttribute&&e.target.getAttribute('data-close');
+  if(c)$(c).classList.remove('on');
+  if(e.target.classList&&e.target.classList.contains('ov'))e.target.classList.remove('on');
+});
+$('taskToggle').addEventListener('click',function(){
+  var f=$('taskForm');f.classList.toggle('hidden');
+  if(!f.classList.contains('hidden'))$('tfTitle').focus();
+});
+$('tfCancel').addEventListener('click',function(){
+  $('taskForm').classList.add('hidden');
+  ['tfTitle','tfMileage','tfDate','tfDesc'].forEach(function(i){$(i).value='';});
+});
+$('tfAdd').addEventListener('click',function(){
+  var t=$('tfTitle').value.trim();if(!t)return;
+  var e={id:nextId++,date:$('tfDate').value||null,mileage:$('tfMileage').value?+$('tfMileage').value:null,
+    mileageApprox:false,category:'Planowane',title:t,description:$('tfDesc').value.trim()||null,
+    cost:null,source:null,status:'planned',done:false};
+  entries.push(e);order.push(e.id);
+  ['tfTitle','tfMileage','tfDate','tfDesc'].forEach(function(i){$(i).value='';});
+  $('taskForm').classList.add('hidden');save();renderAll();
+});
+$('plannedList').addEventListener('click',function(e){
+  var t=e.target.closest('[data-tick]');if(t){toggleDone(+t.getAttribute('data-tick'));return;}
+  var d=e.target.closest('[data-delid]');if(d){removeEntry(+d.getAttribute('data-delid'));}
+});
+$('expandAll').addEventListener('click',function(){
+  var gs=groups(),allOpen=gs.length>0&&gs.every(function(g){return expanded[g.key];});
+  expanded={};if(!allOpen)gs.forEach(function(g){expanded[g.key]=true;});
+  renderTable();
+});
+document.querySelector('thead').addEventListener('click',function(e){
+  var b=e.target.closest('[data-sort]');if(!b)return;
+  var k=b.getAttribute('data-sort');
+  if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=k;sortDir='asc';}
+  renderTable();
+});
+$('tbody').addEventListener('click',function(e){
+  var se=e.target.closest('[data-saveedit]');
+  if(se){
+    var id=+se.getAttribute('data-saveedit');
+    entries.forEach(function(x){if(x.id===id){
+      x.date=$('e_date').value||null;
+      x.mileage=$('e_km').value?+$('e_km').value:null;
+      x.mileageApprox=$('e_ap').checked;
+      x.category=$('e_cat').value;
+      x.title=$('e_title').value;
+      x.cost=$('e_cost').value||null;
+      x.description=$('e_desc').value||null;
+      x.status=$('e_st').value;
+      if(x.status==='planned'&&order.indexOf(x.id)<0)order.push(x.id);
+    }});
+    editingId=null;save();renderAll();return;
+  }
+  if(e.target.closest('[data-canceledit]')){editingId=null;renderTable();return;}
+  var ed=e.target.closest('[data-edit]');if(ed){editingId=+ed.getAttribute('data-edit');renderTable();return;}
+  var dl2=e.target.closest('[data-delid]');if(dl2){removeEntry(+dl2.getAttribute('data-delid'));return;}
+  var g=e.target.closest('[data-g]');if(g){var k=g.getAttribute('data-g');expanded[k]=!expanded[k];renderTable();}
+});
+
+/* drag & drop */
+var dragIdx=null;
+$('plannedList').addEventListener('dragstart',function(e){
+  var li=e.target.closest('li[data-i]');if(!li)return;
+  dragIdx=+li.getAttribute('data-i');li.classList.add('dragging');
+  try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','x');}catch(err){}
+});
+$('plannedList').addEventListener('dragover',function(e){
+  e.preventDefault();var li=e.target.closest('li[data-i]');if(!li)return;
+  var all=$('plannedList').querySelectorAll('li');
+  for(var i=0;i<all.length;i++)all[i].classList.remove('over');
+  if(+li.getAttribute('data-i')!==dragIdx)li.classList.add('over');
+});
+$('plannedList').addEventListener('drop',function(e){
+  e.preventDefault();var li=e.target.closest('li[data-i]');if(!li||dragIdx==null)return;
+  var to=+li.getAttribute('data-i');
+  if(to!==dragIdx){
+    var ids=plannedOrdered().map(function(x){return x.id;});
+    var mv=ids.splice(dragIdx,1)[0];ids.splice(to,0,mv);order=ids;save();
+  }
+  dragIdx=null;renderPlanned();
+});
+$('plannedList').addEventListener('dragend',function(){
+  dragIdx=null;
+  var all=$('plannedList').querySelectorAll('li');
+  for(var i=0;i<all.length;i++){all[i].classList.remove('over');all[i].classList.remove('dragging');}
+});
+
+applyTheme();renderAll();
+</script>
+</body>
+</html>
