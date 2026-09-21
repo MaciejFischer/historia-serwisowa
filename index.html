@@ -3,58 +3,70 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Historia Serwisowa Samochodu</title>
+<title>Historia serwisowa</title>
 <style>
   :root{
     --accent:#f59e0b; --accent-fg:#0f172a; --green:#10b981; --red:#ef4444;
-    --radius:12px;
+    --radius:14px; --focus:rgba(245,158,11,.35);
   }
   html[data-theme="dark"]{
-    --bg:#020617; --fg:#f1f5f9; --card:#0f172a; --card2:#16233b; --border:#1e293b;
-    --muted:#94a3b8; --faint:#64748b; --input:#1e293b; --hover:rgba(148,163,184,.10);
-    --chip-bg:#1e293b; --chip-fg:#cbd5e1; --shadow:0 10px 30px rgba(0,0,0,.45);
+    --bg:#0b1222; --fg:#f1f5f9; --card:#0f172a; --card2:#16233b; --border:#1e293b;
+    --muted:#94a3b8; --faint:#64748b; --input:#0b1222; --hover:rgba(148,163,184,.10);
+    --chip-bg:#1e293b; --chip-fg:#cbd5e1; --shadow:0 14px 34px rgba(0,0,0,.3);
+    --card-shadow:0 1px 2px rgba(0,0,0,.22);
   }
   html[data-theme="light"]{
     --bg:#f8fafc; --fg:#0f172a; --card:#ffffff; --card2:#f8fafc; --border:#e2e8f0;
     --muted:#64748b; --faint:#94a3b8; --input:#ffffff; --hover:rgba(15,23,42,.05);
-    --chip-bg:#e2e8f0; --chip-fg:#334155; --shadow:0 10px 30px rgba(15,23,42,.08);
+    --chip-bg:#e2e8f0; --chip-fg:#334155; --shadow:0 14px 34px rgba(15,23,42,.12);
+    --card-shadow:0 1px 2px rgba(15,23,42,.04);
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;transition:background .2s,color .2s}
-  .wrap{max-width:1200px;margin:0 auto;padding:16px}
-  @media(min-width:768px){.wrap{padding:28px}}
-  .topbar{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:13px;color:var(--faint);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:20px}
-  .topbar b{color:var(--muted);font-weight:600}
-  header.app{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px}
-  .brand{display:flex;align-items:center;gap:12px}
-  .brand .ico{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);font-size:30px;line-height:1;color:var(--accent)}
-  h1{font-size:26px;margin:0;letter-spacing:-.02em}
-  .sub{color:var(--muted);font-size:13px;margin:2px 0 0}
+  body{margin:0;background:radial-gradient(circle at 50% -20%,rgba(245,158,11,.08),transparent 34%),var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;line-height:1.45;transition:background .2s,color .2s}
+  .wrap{max-width:1160px;margin:0 auto;padding:18px 16px 28px}
+  @media(min-width:768px){.wrap{padding:28px 28px 42px}}
+  .topbar{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:12px;color:var(--faint);border-bottom:1px solid var(--border);padding:0 2px 11px;margin-bottom:24px}
+  .topbar b{color:var(--muted);font-weight:650}
+  .current-km{width:92px;padding:3px 6px;font-size:12px;border-radius:6px}
+  .change-stamp{white-space:nowrap}
+  header.app{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:24px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .ico{width:78px;height:78px;border-radius:20px;display:grid;place-items:center;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);box-shadow:0 8px 20px rgba(245,158,11,.08);overflow:hidden}
+  .brand .ico img,.vehicle-logo{display:block;width:100%;height:100%;object-fit:contain}
+  .vehicle-logo{width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:4px}
+  html[data-theme="dark"] .brand .ico{background:rgba(71,85,105,.34);border-color:rgba(148,163,184,.55);box-shadow:0 8px 20px rgba(15,23,42,.35)}
+  h1{font-size:27px;line-height:1.15;margin:0;letter-spacing:-.03em}
+  .sub{color:var(--muted);font-size:13px;margin:5px 0 0}
   .tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   button,.btn{font:inherit;cursor:pointer}
-  .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--fg);transition:background .15s}
-  .btn:hover{background:var(--hover)}
-  .btn.sm{padding:6px 10px;font-size:12px}
+  button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--fg);box-shadow:0 1px 1px rgba(0,0,0,.08);transition:background .15s,border-color .15s,transform .15s}
+  .btn:hover{background:var(--hover);border-color:var(--muted)}
+  .btn:active{transform:translateY(1px)}
+  .btn.sm{padding:7px 10px;font-size:12px}
   .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
-  .btn.primary:hover{filter:brightness(1.07)}
+  .btn.primary:hover{filter:brightness(1.07);border-color:var(--accent)}
   .cog{font-size:19px;line-height:1}
-  .btn.icon{width:40px;height:40px;padding:0;justify-content:center}
+  .btn.icon{width:40px;height:40px;padding:0;justify-content:center;font-size:21px}
   .btn.danger{color:var(--red)}
-  .saved{font-size:12px;color:var(--faint);opacity:0;transition:opacity .4s}
+  .saved{font-size:12px;color:var(--green);opacity:0;transition:opacity .4s}
   .saved.on{opacity:1}
   .menuwrap{position:relative}
   .menu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;min-width:250px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:6px}
   .menu button,.menu label{display:flex;width:100%;align-items:center;gap:8px;padding:9px 12px;border:0;background:none;color:var(--fg);border-radius:8px;text-align:left;font:inherit;cursor:pointer}
   .menu button:hover,.menu label:hover{background:var(--hover)}
   .menu .sep{height:1px;background:var(--border);margin:6px 4px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:20px}
-  .card .pad{padding:16px}
-  .ttl{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:30px;box-shadow:var(--card-shadow)}
+  .card .pad{padding:18px}
+  .ttl{font-size:12px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .ttl .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--faint);font-size:12px}
+  .planned-tools{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .planned-sort-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
+  .planned-sort{width:auto;min-width:190px;padding:6px 28px 6px 9px;font-size:12px}
   /* planned */
   #plannedCard{display:flex;flex-direction:column;height:35vh;min-height:250px}
   #plannedList{flex:1;min-height:0;overflow-y:auto;list-style:none;margin:12px 0 0;padding:0 4px 0 0;display:flex;flex-direction:column;gap:8px}
-  #plannedList li{display:flex;align-items:flex-start;gap:10px;padding:9px 11px;border:1px solid var(--border);background:var(--card2);border-radius:10px;cursor:grab;user-select:none;transition:background .15s,border-color .15s,opacity .15s}
+  #plannedList li{display:flex;align-items:flex-start;gap:10px;padding:10px 11px;border:1px solid var(--border);background:var(--card2);border-radius:10px;cursor:grab;user-select:none;transition:background .15s,border-color .15s,opacity .15s}
   #plannedList li:hover{background:var(--hover)}
   #plannedList li.done{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.45)}
   #plannedList li.dragging{opacity:.4;border-color:var(--accent)}
@@ -69,26 +81,31 @@
   .ptxt .d{color:var(--muted)}
   .del{border:0;background:none;color:var(--faint);cursor:pointer;padding:2px 4px;border-radius:6px;font-size:13px}
   .del:hover{color:var(--red);background:rgba(239,68,68,.12)}
-  .taskform{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;padding:12px;border:1px solid var(--border);background:var(--card2);border-radius:10px;margin-top:12px}
+  .taskform{z-index:120}
+  .taskform .modal{max-width:520px}
+  .task-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .task-fields .wide{grid-column:1 / -1}
   /* inputs */
   label.fl{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;white-space:nowrap}
-  input,select,textarea{font:inherit;background:var(--input);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:7px 9px;width:100%}
+  input,select,textarea{font:inherit;background:var(--input);color:var(--fg);border:1px solid var(--border);border-radius:9px;padding:8px 10px;width:100%;transition:border-color .15s,box-shadow .15s}
+  input::placeholder,textarea::placeholder{color:var(--faint)}
   input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--accent)}
   .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
-  .filterrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+  .filterrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
   .chips{display:flex;flex-wrap:wrap;gap:6px}
   .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,.12);color:#b45309;border:1px solid rgba(245,158,11,.35);border-radius:999px;padding:3px 10px;font-size:12px}
   html[data-theme="dark"] .chip{color:#fbbf24}
   .chip button{border:0;background:none;color:inherit;cursor:pointer;font-size:13px;line-height:1}
   .link{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;margin-left:auto;cursor:pointer;font:inherit}
+  .link:hover,.alink:hover{color:var(--accent)}
   /* table */
   table{width:100%;border-collapse:collapse}
   thead{background:var(--card2)}
-  th{text-align:left;padding:9px 12px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap}
+  th{text-align:left;padding:11px 12px;font-size:11px;font-weight:750;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);white-space:nowrap}
   th button{border:0;background:none;color:var(--fg);font:inherit;font-weight:700;display:inline-flex;gap:5px;align-items:center;cursor:pointer}
   th button .ar{color:var(--faint);font-size:11px}
   th button.active .ar{color:var(--accent)}
-  td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:top}
   tr.group{cursor:pointer}
   tr.group:hover{background:var(--hover)}
   tr.group.hl{background:rgba(245,158,11,.06)}
@@ -98,8 +115,23 @@
   .cat.sel{background:rgba(245,158,11,.18);color:#b45309}
   html[data-theme="dark"] .cat.sel{color:#fbbf24}
   .src{display:block;font-size:11px;color:var(--accent);text-decoration:underline;text-underline-offset:2px;margin-top:3px;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .tblhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
-  .empty{text-align:center;color:var(--faint);padding:32px 12px}
+  .tblhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .mobile-sort-controls{display:none;gap:6px}
+  .mobile-sort-controls button{border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:8px;padding:6px 9px;font-size:11px}
+  .mobile-sort-controls button.active{color:var(--fg);border-color:var(--accent);background:rgba(245,158,11,.10)}
+  .mobile-sort-controls .ar{color:var(--accent);margin-left:3px}
+  .preview-wrap{position:relative;display:inline-block}
+  .preview-toggle{border:0;background:none;color:var(--muted);border-radius:7px;padding:3px 5px;font-size:11px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+  .preview-toggle:hover,.preview-toggle[aria-expanded="true"]{color:var(--fg);border-color:var(--accent);background:rgba(245,158,11,.10)}
+  .preview-popover{display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:70;width:min(360px,calc(100vw - 32px));max-height:300px;overflow:auto;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);text-align:left}
+  .preview-wrap:hover .preview-popover,.preview-wrap:focus-within .preview-popover,.preview-popover.open{display:block}
+  .preview-popover h3{margin:0 0 8px;font-size:12px}
+  .preview-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+  .preview-list li{font-size:12px;line-height:1.4;padding-top:6px;border-top:1px solid var(--border)}
+  .preview-list li:first-child{padding-top:0;border-top:0}
+  .preview-list .pcat{display:block;color:var(--accent);font-size:11px}
+  @media(max-width:767px){.preview-wrap{display:none}}
+  .empty{text-align:center;color:var(--muted);padding:42px 12px}
   .iconbtn{border:0;background:none;color:var(--muted);cursor:pointer;padding:5px 6px;border-radius:7px;font-size:14px}
   .iconbtn:hover{background:var(--hover);color:var(--fg)}
   .iconbtn.del:hover{color:var(--red);background:rgba(239,68,68,.12)}
@@ -108,16 +140,18 @@
   /* modal */
   .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}
   .ov.on{display:flex}
-  .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:22px;box-shadow:var(--shadow)}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:24px;box-shadow:var(--shadow)}
   .modal.sm{max-width:420px}
   .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-  .mhead h2{margin:0;font-size:18px}
-  .x{border:0;background:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+  .mhead h2{margin:0;font-size:19px;letter-spacing:-.02em}
+  .x{border:0;background:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;border-radius:7px;padding:4px 7px}
+  .x:hover{background:var(--hover);color:var(--fg)}
   .f{margin-bottom:12px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .hint{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:6px}
   .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
   .hidden{display:none !important}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   /* custom picker (matches artifact UI) */
   .picker{position:relative}
   .pickbtn{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;background:var(--input);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:left;font:inherit}
@@ -137,11 +171,19 @@
   .mobile-history{display:none}
   .mobile-visit{border-bottom:1px solid var(--border)}
   .mobile-visit:last-child{border-bottom:0}
-  .mobile-summary{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;background:var(--card)}
+  .mobile-summary{display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer;background:var(--card);transition:background .15s}
   .mobile-summary:active{background:var(--hover)}
   .mobile-chevron{color:var(--muted);font-size:12px;width:14px}
-  .mobile-date{font-weight:700;min-width:82px}
-  .mobile-km{font-size:12px;color:var(--muted);margin-top:2px}
+  .mobile-summary-main{min-width:0;flex:1}
+  .mobile-fields{display:flex;flex-wrap:wrap;gap:10px 18px}
+  .mobile-field{min-width:82px}
+  .mobile-field-label{display:block;color:var(--faint);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .mobile-date{font-weight:700}
+  .mobile-km{font-size:12px;color:var(--muted);margin-top:1px}
+  .mobile-categories{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+  .mobile-category{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--chip-bg);color:var(--chip-fg);border-radius:999px;padding:2px 7px;font-size:10px;line-height:1.35}
+  .mobile-category.sel{background:rgba(245,158,11,.18);color:#b45309}
+  html[data-theme="dark"] .mobile-category.sel{color:#fbbf24}
   .mobile-count{margin-left:auto;background:var(--chip-bg);color:var(--chip-fg);border-radius:999px;padding:3px 8px;font-size:11px;white-space:nowrap}
   .mobile-items{background:var(--card2);padding:0 12px 10px}
   .mobile-item{position:relative;padding:11px 40px 11px 0;border-top:1px solid var(--border)}
@@ -156,21 +198,24 @@
     .wrap{padding:12px}
     .topbar{font-size:12px;line-height:1.45;margin-bottom:14px}
     header.app{margin-bottom:14px;gap:10px}
-    .brand .ico{width:44px;height:44px;font-size:24px}
+    .brand .ico{width:60px;height:60px}
     h1{font-size:22px}
     .tools{width:100%;display:grid;grid-template-columns:40px 1fr 1.25fr;gap:7px}
     .tools .saved{display:none}
     .tools .menuwrap{width:100%}
     .tools .menuwrap .btn{width:100%;justify-content:center}
     .tools #addBtn{width:100%;justify-content:center;padding:9px 8px;font-size:13px}
-    .card{border-radius:13px;margin-bottom:14px}
+    .card{border-radius:13px;margin-bottom:22px}
     .card .pad{padding:13px}
     #plannedCard{height:40vh;min-height:260px}
     #plannedList li{padding:11px 10px;gap:9px}
     .ptxt{font-size:13px}
-    .taskform{gap:9px}
-    .taskform>div{width:100%!important;flex-basis:100%!important}
-    .taskform .btn{flex:1;justify-content:center}
+    .task-fields{grid-template-columns:1fr}
+    .task-fields .wide{grid-column:auto}
+    .taskform .foot .btn{flex:1;justify-content:center}
+    .planned-tools{width:100%;margin-left:0;align-items:stretch}
+    .planned-sort-label{align-self:center}
+    .planned-sort{flex:1;min-width:0}
     .filter-mobile-toggle{display:flex;width:100%;justify-content:space-between;margin-top:10px}
     #filterBody.hidden-mobile{display:none}
     .grid4{grid-template-columns:1fr;gap:10px}
@@ -184,6 +229,8 @@
     .mobile-history{display:block}
     .tblhead{padding:10px 13px}
     .tblhead strong{font-size:13px}
+    .mobile-sort-controls{display:flex;order:3;width:100%}
+    .mobile-sort-controls button{flex:1;text-align:center}
     .modal{padding:18px;max-height:92vh}
     .grid2{grid-template-columns:1fr;gap:10px}
     .mhead h2{font-size:17px}
@@ -197,14 +244,14 @@
 
   <header class="app">
     <div class="brand">
-      <div class="ico">&#128663;</div>
+      <div class="ico"><img src="cupra-logo.png" alt="Logo CUPRA" /></div>
       <div>
-        <h1>Historia Serwisowa</h1>
+        <h1>Historia serwisowa</h1>
         <p class="sub" id="modelName"></p>
       </div>
     </div>
     <div class="tools">
-      <span class="saved" id="saved">Zapisano lokalnie &#10003;</span>
+      <span class="saved" id="saved" aria-live="polite">Zapisano lokalnie &#10003;</span>
       <button class="btn icon" id="themeBtn" title="Zmień motyw">&#9788;</button>
       <div class="menuwrap">
         <button class="btn" id="optBtn"><span class="cog">&#9881;</span> Opcje <span class="car">&#9662;</span></button>
@@ -224,15 +271,31 @@
     <div class="ttl">
       <span>&#128295; Nadchodzące czynności</span>
       <span class="note" id="plannedNote"></span>
-      <button class="btn sm" id="taskToggle" style="margin-left:auto">+ Dodaj zadanie</button>
+      <div class="planned-tools">
+        <label class="planned-sort-label" for="plannedSort">Sortuj</label>
+        <select class="planned-sort" id="plannedSort" aria-label="Sortowanie nadchodzących czynności">
+          <option value="manual">Kolejność ręczna</option>
+          <option value="title">Alfabetycznie po nazwie</option>
+          <option value="date">Po dacie w opisie</option>
+          <option value="mileage">Po przebiegu w opisie</option>
+        </select>
+        <button class="btn sm" id="taskToggle">+ Dodaj zadanie</button>
+      </div>
     </div>
-    <div class="taskform hidden" id="taskForm">
-      <div style="flex:1 1 200px"><label class="fl">Zadanie</label><input id="tfTitle" placeholder="np. Wymiana oleju Haldex" /></div>
-      <div style="width:130px"><label class="fl">Przy km</label><input id="tfMileage" type="number" placeholder="118000" /></div>
-      <div style="width:160px"><label class="fl">Do dnia</label><input id="tfDate" type="date" /></div>
-      <div style="flex:1 1 170px"><label class="fl">Uwagi</label><input id="tfDesc" /></div>
-      <button class="btn primary" id="tfAdd">Dodaj</button>
-      <button class="btn" id="tfCancel">Anuluj</button>
+    <div class="ov taskform" id="taskForm" role="dialog" aria-modal="true" aria-labelledby="taskFormTitle">
+      <div class="modal">
+        <div class="mhead"><h2 id="taskFormTitle">Dodaj zadanie</h2><button class="x" data-close="taskForm" aria-label="Zamknij">&#10005;</button></div>
+        <div class="task-fields">
+          <div class="wide"><label class="fl" for="tfTitle">Zadanie</label><input id="tfTitle" placeholder="np. Wymiana oleju Haldex" /></div>
+          <div><label class="fl" for="tfMileage">Przy km</label><input id="tfMileage" type="number" placeholder="118000" /></div>
+          <div><label class="fl" for="tfDate">Do dnia</label><input id="tfDate" type="date" /></div>
+          <div class="wide"><label class="fl" for="tfDesc">Uwagi</label><input id="tfDesc" /></div>
+        </div>
+        <div class="foot">
+          <button class="btn" id="tfCancel">Anuluj</button>
+          <button class="btn primary" id="tfAdd">Dodaj</button>
+        </div>
+      </div>
     </div>
     <ul id="plannedList"></ul>
   </section>
@@ -261,9 +324,14 @@
   <section class="card" style="overflow:hidden">
     <div class="tblhead">
       <strong id="visitCount"></strong>
+      <div class="mobile-sort-controls" aria-label="Sortowanie historii serwisowej">
+        <button type="button" data-mobile-sort="date" aria-label="Sortuj historię po dacie">Data <span class="ar">&#8645;</span></button>
+        <button type="button" data-mobile-sort="mileage" aria-label="Sortuj historię po przebiegu">Przebieg <span class="ar">&#8645;</span></button>
+      </div>
       <button class="btn sm" id="expandAll">Rozwiń wszystkie</button>
     </div>
     <div class="desktop-table" style="overflow-x:auto"><table id="tbl">
+      <caption class="sr-only">Historia serwisowa wykonanych czynności</caption>
       <thead><tr>
         <th style="width:34px"></th>
         <th><button data-sort="date">Data <span class="ar">&#8645;</span></button></th>
@@ -332,33 +400,162 @@
   </div>
 </div>
 
+<!-- PLANNED DELETE MODAL -->
+<div class="ov" id="ovPlannedDelete" role="dialog" aria-modal="true" aria-labelledby="plannedDeleteTitle">
+  <div class="modal sm">
+    <h2 id="plannedDeleteTitle" style="margin:0 0 8px;font-size:18px">Usunąć zaplanowaną czynność?</h2>
+    <p id="plannedDeleteText" style="color:var(--muted);font-size:13px;margin:0 0 16px"></p>
+    <div class="foot">
+      <button class="btn" id="cancelPlannedDelete" data-close="ovPlannedDelete">Anuluj</button>
+      <button class="btn danger" id="confirmPlannedDelete" style="border-color:rgba(239,68,68,.4)">Usuń czynność</button>
+    </div>
+  </div>
+</div>
+
 <script>
 "use strict";
 var SEED = {"vehicle":{"model":"SEAT Leon Cupra 5F DSG 300KM (CJXC)"},"categories":["Olej silnikowy","Filtr oleju","Filtr powietrza","Filtr kabinowy","Płyn chłodniczy / Chłodzenie","Płyn hamulcowy","Tarcze hamulcowe przód","Tarcze hamulcowe tył","Klocki hamulcowe","Świece zapłonowe","Olej DSG","Olej mechanizm różnicowy","Opony / Koła","Zawieszenie / Geometria","Akumulator","Klimatyzacja","Diagnostyka / Naprawa","Przegląd","Karoseria / Lakier","Inne","Planowane"],"entryTemplates":[{"label":"Wymiana oleju silnikowego","category":"Olej silnikowy"},{"label":"Wymiana filtra oleju","category":"Filtr oleju"},{"label":"Wymiana filtra powietrza","category":"Filtr powietrza"},{"label":"Wymiana filtra kabinowego","category":"Filtr kabinowy"},{"label":"Wymiana płynu chłodzącego","category":"Płyn chłodniczy / Chłodzenie"},{"label":"Wymiana płynu hamulcowego","category":"Płyn hamulcowy"},{"label":"Wymiana tarcz hamulcowych przód","category":"Tarcze hamulcowe przód"},{"label":"Wymiana tarcz hamulcowych tył","category":"Tarcze hamulcowe tył"},{"label":"Wymiana klocków hamulcowych","category":"Klocki hamulcowe"},{"label":"Wymiana świec zapłonowych","category":"Świece zapłonowe"},{"label":"Wymiana oleju DSG","category":"Olej DSG"},{"label":"Wymiana opon / kół","category":"Opony / Koła"},{"label":"Geometria / zbieżność","category":"Zawieszenie / Geometria"},{"label":"Przegląd okresowy","category":"Przegląd"},{"label":"Diagnostyka / naprawa","category":"Diagnostyka / Naprawa"},{"label":"Inne","category":"Inne"}],"entries":[{"id":1,"date":"2018-03-12","mileage":14975,"mileageApprox":false,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers XF LongLife 5W30 VW504/507","cost":null,"source":null,"status":"completed"},{"id":2,"date":"2018-03-19","mileage":15100,"mileageApprox":false,"category":"Płyn chłodniczy / Chłodzenie","title":"Wymiana obudowy termostatu","description":"Pierwsza wymiana obudowy termostatu","cost":null,"source":null,"status":"completed"},{"id":3,"date":"2018-03-19","mileage":15100,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Wymiana sondy lambda","description":null,"cost":null,"source":null,"status":"completed"},{"id":4,"date":"2019-02-25","mileage":30000,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju - przegląd 30k","description":"Millers 5W40 XF LongLife","cost":null,"source":null,"status":"completed"},{"id":5,"date":"2019-02-25","mileage":30000,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"Przegląd 30k","cost":null,"source":null,"status":"completed"},{"id":6,"date":"2019-02-25","mileage":30000,"mileageApprox":true,"category":"Filtr powietrza","title":"Wymiana filtra powietrza (na żądanie)","description":"Mann/Knecht 292x177x70","cost":null,"source":null,"status":"completed"},{"id":7,"date":"2020-02-21","mileage":42000,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers 5W40 XF LongLife","cost":null,"source":null,"status":"completed"},{"id":8,"date":"2020-02-21","mileage":42000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Diagnoza cieknącego termostatu","description":"Problem cieknącego termostatu - druga diagnoza, wymiana zaplanowana na później","cost":null,"source":null,"status":"completed"},{"id":9,"date":"2020-02-26","mileage":42000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Wymiana obudowy termostatu (drugi raz)","description":null,"cost":null,"source":null,"status":"completed"},{"id":10,"date":"2020-06-12","mileage":null,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Błędy komputera i zatrzymanie samochodu","description":"Brak reakcji gazu, po zatrzymaniu ponowne uruchomienie bez błędów. W trakcie jazdy kilka razy skoczyła wskazówka obrotomierza do zera. Wizyta w serwisie - skasowanie błędów (bez procedur), zalecenie obserwacji.","cost":null,"source":null,"status":"completed"},{"id":11,"date":"2020-07-22","mileage":33091,"mileageApprox":false,"category":"Opony / Koła","title":"Założenie opon letnich","description":"Opony letnie PS4s","cost":null,"source":null,"status":"completed"},{"id":12,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Tarcze hamulcowe tył","title":"Wymiana tarcz tył - przegląd 60k","description":"ATE 310mm 7kg, nr kat. 24.0122-0219.1","cost":null,"source":null,"status":"completed"},{"id":13,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Klocki hamulcowe","title":"Wymiana klocków - przegląd 60k","description":"EBC Yellow","cost":null,"source":null,"status":"completed"},{"id":14,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego - przegląd 60k","description":"DOT 4 Motul RBF 600, stalowy oplot z PizzaBrakes","cost":null,"source":null,"status":"completed"},{"id":15,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Filtr powietrza","title":"Wymiana filtra powietrza - przegląd 60k","description":"MANN C30 005","cost":null,"source":null,"status":"completed"},{"id":16,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego - przegląd 60k","description":"Knecht LAK 888","cost":null,"source":null,"status":"completed"},{"id":17,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Filtr oleju","title":"Wymiana filtra oleju - przegląd 60k","description":"MANN HU 6013z","cost":null,"source":null,"status":"completed"},{"id":18,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Olej silnikowy","title":"Wymiana oleju silnikowego - przegląd 60k","description":"Millers 5W40 Energy Efficience","cost":null,"source":null,"status":"completed"},{"id":19,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Olej DSG","title":"Wymiana oleju DSG - przegląd 60k","description":"Olej oryginalny","cost":null,"source":null,"status":"completed"},{"id":20,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Olej mechanizm różnicowy","title":"Wymiana oleju w mechanizmie różnicowym","description":"Olej oryginalny","cost":null,"source":null,"status":"completed"},{"id":21,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Świece zapłonowe","title":"Wymiana świec zapłonowych - przegląd 60k","description":"4x NGK 94833 PLFER7A8EG","cost":null,"source":null,"status":"completed"},{"id":22,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Akumulator","title":"Naładowanie akumulatora","description":"Było 345/360","cost":null,"source":null,"status":"completed"},{"id":23,"date":"2021-09-02","mileage":60000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Naprawa wycieku płynu chłodniczego","description":"Wymieniona część (prawdopodobnie pompa)","cost":"1185 zł, -90% = 121 zł","source":null,"status":"completed"},{"id":24,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Przegląd","title":"Przegląd okresowy","description":"Serwis bez części własnych","cost":"1218,78 zł","source":null,"status":"completed"},{"id":25,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Tarcze hamulcowe przód","title":"Wymiana tarcz przód","description":"EBC 340mm, EBC BSD1877","cost":"958 zł","source":"https://tomson.com.pl/product-pol-5042-Tarcze-hamulcowe-EBC-BSD1877-Blade-Slot-Design-Audi-A3-S3-RS3-TT-TTS-VW-Golf-VII-GTi-VII-R-Octavia-RS-340-mm-przod.html","status":"completed"},{"id":26,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Klocki hamulcowe","title":"Wymiana klocków przód","description":"EBC DP42127R","cost":"888 zł","source":"https://tomson.com.pl/product-pol-5043-Klocki-hamulcowe-EBC-DP42127R-Yellow-Stuff-Audi-S3-TT-TTS-VW-Golf-VII-GTi-VII-R-Octavia-RS-Seat-Leon-Cupra-przod.html","status":"completed"},{"id":27,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego","description":"TRW GP DOT 4, 1L (wymiana co 2 lata)","cost":"60 zł","source":"https://motostacja.com/p/TRW-PFB601/","status":"completed"},{"id":28,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers CFS NT","cost":null,"source":null,"status":"completed"},{"id":29,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"Knecht LAK 888","cost":"50 zł","source":null,"status":"completed"},{"id":30,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Zawieszenie / Geometria","title":"Geometria - zbieżność","description":"Lewy przód i prawy tył poza normami, wykonano w ASO","cost":"250 zł","source":null,"status":"completed"},{"id":31,"date":"2022-03-22","mileage":null,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła letnie","description":"PP lekko krzywy od środka - założony na PT","cost":"130 zł netto / 159 zł brutto","source":null,"status":"completed"},{"id":32,"date":"2023-03-01","mileage":71000,"mileageApprox":true,"category":"Inne","title":"Wymiana wycieraczek przód + tył","description":"Bosch AeroTwin","cost":null,"source":null,"status":"completed"},{"id":33,"date":"2023-03-01","mileage":71000,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"Knecht LAK 888","cost":null,"source":null,"status":"completed"},{"id":34,"date":"2024-02-01","mileage":83800,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju - mały przegląd (TGE auto)","description":"Olej 5W40, płukanka silnika","cost":null,"source":null,"status":"completed"},{"id":35,"date":"2024-04-01","mileage":85461,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła letnie (Szmyt)","description":"PS4s - 5,5mm tył; 4mm przód","cost":null,"source":null,"status":"completed"},{"id":36,"date":"2024-04-15","mileage":85461,"mileageApprox":false,"category":"Filtr powietrza","title":"Wymiana filtra powietrza","description":"Mann C30 005","cost":null,"source":null,"status":"completed"},{"id":37,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Świece zapłonowe","title":"Wymiana świec zapłonowych (Maran)","description":"NGK 94833","cost":"1041 zł łącznie (bez robocizny i czyszczenia nadkoli)","source":null,"status":"completed"},{"id":38,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego (Maran)","description":"ATE typ 200 DOT 4","cost":null,"source":null,"status":"completed"},{"id":39,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Klimatyzacja","title":"Czyszczenie klimatyzacji","description":"Pakiet czyszczenia klimatyzacji","cost":"390 zł","source":null,"status":"completed"},{"id":40,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Inne","title":"Czyszczenie podszybia i nadkoli z liści","description":"Udrożnienie odpływów","cost":null,"source":null,"status":"completed"},{"id":41,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Klimatyzacja","title":"Naprawa wycieku z parownika","description":"Wymiana o-ringów","cost":null,"source":null,"status":"completed"},{"id":42,"date":"2024-06-01","mileage":87000,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego węglowego","description":"Knecht LAK888","cost":null,"source":null,"status":"completed"},{"id":43,"date":"2024-12-01","mileage":90000,"mileageApprox":true,"category":"Opony / Koła","title":"Wymiana na koła zimowe","description":"Nowe opony Nokian Snowproof P 225/45 R17. Problem z wyważeniem 2x tylnych opon (150N i 160N), poprawione przełożenie na feldze - wynik 60N i 65N. Renowacja felg.pl, Hunter test drogowy.","cost":"516 zł (renowacja felg)","source":null,"status":"completed"},{"id":44,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Przegląd","title":"Przegląd okresowy (EK Racing Gdańsk)","description":"Kielnieńska 174","cost":"150 zł","source":null,"status":"completed"},{"id":45,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Klimatyzacja","title":"Odgrzybianie klimatyzacji","description":null,"cost":"50 zł","source":null,"status":"completed"},{"id":46,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Podłączenie komputera diagnostycznego","description":null,"cost":"80 zł","source":null,"status":"completed"},{"id":47,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers C3 5W40 Nanodrive","cost":null,"source":null,"status":"completed"},{"id":48,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: skorodowane śruby łącznika wydechu","description":"Zaobserwowane podczas przeglądu EK Racing","cost":null,"source":null,"status":"completed"},{"id":49,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: pocą się amortyzatory przednie","description":"Zaobserwowane podczas przeglądu EK Racing","cost":null,"source":null,"status":"completed"},{"id":50,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: olej na przewodzie prawy przód z turbo","description":"Lekki wyciek oleju - obserwować","cost":null,"source":null,"status":"completed"},{"id":51,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: błąd komputera - katalizator","description":"Błąd zniknął po skasowaniu","cost":null,"source":null,"status":"completed"},{"id":52,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Płyn chłodniczy / Chłodzenie","title":"Uwaga: gęsty, brudny płyn chłodniczy","description":"Potencjalnie: wymiennik ciepła olej/płyn chłodzący lub uszczelka pod głowicą. Możliwa część: chłodniczka NIS90914 Nielsen, ok. 350 zł, ok. 4h robocizny na wymianę i płukanie układu.","cost":"~350 zł (część)","source":null,"status":"completed"},{"id":53,"date":"2025-04-04","mileage":null,"mileageApprox":false,"category":"Karoseria / Lakier","title":"Zgłoszenie rdzy - Gdańsk","description":null,"cost":null,"source":null,"status":"completed"},{"id":54,"date":"2025-05-01","mileage":97400,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"LAK888 Mann","cost":null,"source":null,"status":"completed"},{"id":55,"date":"2025-05-13","mileage":null,"mileageApprox":false,"category":"Karoseria / Lakier","title":"Ponowne zgłoszenie rdzy","description":"Tym razem skutecznie, z pomiarem grubości lakieru","cost":null,"source":null,"status":"completed"},{"id":56,"date":"2025-06-25","mileage":null,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"1sza wizyta w Auto Miras Gdańsk","description":"Diagnoza i kosztorys naprawy - olej w układzie chłodzącym","cost":null,"source":null,"status":"completed"},{"id":57,"date":"2025-07-16","mileage":98000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Naprawa układu chłodzenia (Auto Miras)","description":"Wymiana chłodnicy oleju + elementy towarzyszące + płukanie układu. Płyn chłodzący G12 evo (G12E050A2). Naprawa trwała 16.07.2025-25.07.2025.","cost":null,"source":null,"status":"completed"},{"id":58,"date":"2025-07-16","mileage":98000,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju (Auto Miras)","description":"Millers Energy Efficient C3 5W40 + filtr Filtron 688/2","cost":null,"source":null,"status":"completed"},{"id":59,"date":"2025-10-25","mileage":101645,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła zimowe","description":"Nokian WR Snowproof P 225/45 R17 (Pruszków, ul. Powstańców 3)","cost":"110 zł","source":null,"status":"completed"},{"id":60,"date":"2025-10-27","mileage":101822,"mileageApprox":false,"category":"Zawieszenie / Geometria","title":"Geometria - zbieżność przód/tył","description":"Raszyn","cost":"300 zł","source":null,"status":"completed"},{"id":61,"date":"2026-04-17","mileage":null,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła letnie (Pruszków)","description":"Lewa tylna felga lekko skrzywiona wewnętrznie, reszta w normie","cost":null,"source":null,"status":"completed"},{"id":62,"date":"2026-06-30","mileage":107500,"mileageApprox":true,"category":"Inne","title":"Wymiana pompki spryskiwacza szyb","description":"Topran 107 819 HP","cost":null,"source":null,"status":"completed"},{"id":63,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju - przegląd (EK Racing Gdańsk)","description":"Millers 5W40 NanoDrive, Kielnieńska 174","cost":"220 zł robocizna (przegląd + wymiana oleju i filtra)","source":null,"status":"completed"},{"id":64,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego (EK Racing Gdańsk)","description":"Ate typ 200 DOT 4, nr 03.9901-6212","cost":"140 zł robocizna","source":null,"status":"completed"},{"id":65,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Tarcze hamulcowe tył","title":"Wymiana tarcz tył (EK Racing Gdańsk)","description":"Brembo 310mm, nr 09.A200.11","cost":"220 zł robocizna (tarcze+klocki)","source":null,"status":"completed"},{"id":66,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Klocki hamulcowe","title":"Wymiana klocków tył (EK Racing Gdańsk)","description":"EBC Green Stuff DP22173","cost":null,"source":null,"status":"completed"},{"id":67,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Diagnostyka / Naprawa","title":"Odczyt błędów i zapis przeglądu","description":"Procedura hamulca ręcznego elektrycznego do wymiany tarcz i klocków","cost":"100 zł + 80 zł (procedura hamulca)","source":null,"status":"completed"},{"id":68,"date":"2026-07-27","mileage":108000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Wymiana nagrzewnicy (EK Racing Gdańsk)","description":"Nissen 73980. Płukanie układu chłodzenia Liqui Moly Kuhler Reiniger. Nowy płyn chłodniczy G12 evo.","cost":null,"source":null,"status":"completed"},{"id":69,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Płukanka do chłodnicy","description":"Liqui Moly 2699 300ml","cost":"40 zł","source":"https://zmienolej.pl/dodatki/3723-plukanka-do-chlodnic-liqui-moly-2699-300ml-4100420026997.html","status":"planned","done":false},{"id":70,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Płyn chłodniczy G12","description":"Potrzebne 8L, 2x5L VW/Audi/Skoda/Seat OE","cost":"180 zł (2x5L)","source":"https://allegro.pl/oferta/plyn-chlodniczy-g12-5l-vw-audi-skoda-seat-oe-14795655783","status":"planned","done":false},{"id":71,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Zbiornik wyrównawczy","description":"Bez krzemionki - lepiej nie brać najtańszego","cost":"70-100 zł","source":null,"status":"planned","done":false},{"id":72,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Obejma wydechu","description":null,"cost":null,"source":null,"status":"planned","done":false},{"id":73,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Naprawa skorodowanych śrub łącznika wydechu","description":null,"cost":null,"source":null,"status":"planned","done":false},{"id":74,"date":null,"mileage":118000,"mileageApprox":false,"category":"Planowane","title":"Wymiana oleju + filtr (planowana)","description":"Interwał 10 tys. km","cost":null,"source":null,"status":"planned","done":false},{"id":75,"date":null,"mileage":114000,"mileageApprox":false,"category":"Planowane","title":"Wymiana oleju Haldex (planowana)","description":"Poprzednia wymiana przy 54k km","cost":null,"source":null,"status":"planned","done":false},{"id":76,"date":null,"mileage":114000,"mileageApprox":false,"category":"Planowane","title":"Wymiana oleju DSG (planowana)","description":"Poprzednia wymiana przy 54k km","cost":null,"source":null,"status":"planned","done":false},{"id":77,"date":null,"mileage":125700,"mileageApprox":false,"category":"Planowane","title":"Wymiana świec zapłonowych (planowana)","description":"NGK","cost":null,"source":null,"status":"planned","done":false},{"id":78,"date":"2028-07-01","mileage":null,"mileageApprox":false,"category":"Planowane","title":"Wymiana płynu hamulcowego (planowana)","description":null,"cost":null,"source":null,"status":"planned","done":false},{"id":79,"date":null,"mileage":100000,"mileageApprox":false,"category":"Planowane","title":"Czyszczenie intercoolera/dolotu (planowane)","description":"Aby uniknąć osadu olejowego (maślanki)","cost":null,"source":null,"status":"planned","done":false},{"id":80,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Wymiana rozrządu (warunkowa)","description":"Dopiero gdy pojawią się niepokojące dźwięki","cost":null,"source":null,"status":"planned","done":false}]};
 
-var K_ENTRIES='csh:entries', K_ORDER='csh:order', K_THEME='csh:theme';
+var K_ENTRIES='csh:entries', K_ORDER='csh:order', K_THEME='csh:theme', K_CURRENT_KM='csh:currentMileage', K_CHANGED='csh:lastChanged';
 var VEHICLE=SEED.vehicle, CATS=SEED.categories, TPL=SEED.entryTemplates;
+var storageIssues=[];
 
 function clone(o){return JSON.parse(JSON.stringify(o));}
-function load(k,f){try{var r=localStorage.getItem(k);if(r){var p=JSON.parse(r);if(p)return p;}}catch(e){}return f;}
-var entries = load(K_ENTRIES, null) || clone(SEED.entries);
-var order   = load(K_ORDER, null)   || entries.filter(function(e){return e.status==='planned';}).map(function(e){return e.id;});
-var theme   = (function(){try{var t=localStorage.getItem(K_THEME);return t==='light'||t==='dark'?t:'dark';}catch(e){return 'dark';}})();
+function storageIssue(message,error){
+  console.error(message,error||'');
+  storageIssues.push(message);
+}
+function load(k,f){
+  try{
+    var r=localStorage.getItem(k);
+    if(r){var p=JSON.parse(r);if(p)return p;}
+  }catch(e){storageIssue('Nie udało się odczytać zapisanych danych lokalnych.',e);}
+  return f;
+}
+var storedEntries=load(K_ENTRIES, null), storedOrder=load(K_ORDER, null);
+var storedData=storedEntries==null?null:normalizeImportedData({entries:storedEntries,plannedOrder:storedOrder});
+if(storedData&&storedData.error){
+  storageIssue('Zapisane dane lokalne mają nieprawidłowy format. Przywrócono dane początkowe.');
+}
+var entries = storedData&&!storedData.error?storedData.entries:clone(SEED.entries);
+var order   = storedData&&!storedData.error?storedData.order:entries.filter(function(e){return e.status==='planned';}).map(function(e){return e.id;});
+var storedCurrentMileage=load(K_CURRENT_KM,null), currentMileage=null;
+if(storedCurrentMileage!=null){
+  if(Number.isInteger(Number(storedCurrentMileage))&&Number(storedCurrentMileage)>=0)currentMileage=Number(storedCurrentMileage);
+  else storageIssue('Zapisany aktualny przebieg ma nieprawidłową wartość i został pominięty.');
+}
+var storedChanged=load(K_CHANGED,null), lastChanged=null;
+if(Number.isFinite(Number(storedChanged))&&Number(storedChanged)>0)lastChanged=Number(storedChanged);
+var theme   = (function(){
+  try{var t=localStorage.getItem(K_THEME);return t==='light'||t==='dark'?t:'dark';}
+  catch(e){storageIssue('Nie udało się odczytać ustawień motywu.',e);return 'dark';}
+})();
 var nextId  = Math.max.apply(null, entries.map(function(e){return e.id;}).concat([0])) + 1;
 
-var sortKey='date', sortDir='desc', expanded={}, editingId=null, mobileEditId=null, modalEditId=null, selCats=[], pickedPlannedId=null;
+var sortKey='date', sortDir='desc', expanded={}, editingId=null, mobileEditId=null, modalEditId=null, selCats=[], pickedPlannedId=null, plannedDeleteId=null;
 var $=function(id){return document.getElementById(id);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function fmtDate(d){if(!d)return '\u2014';var p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function fmtKm(m,a){if(m==null)return '\u2014';return m.toLocaleString('pl-PL')+' km'+(a?' (szac.)':'');}
+function fmtChanged(ts){
+  if(!ts)return '\u2014';
+  return new Date(ts).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'});
+}
 function parseCost(c){if(!c)return 0;var m=String(c).match(/[\d]+([.,]\d+)?/);return m?parseFloat(m[0].replace(',','.')):0;}
 
 var saveT;
 function save(){
-  try{localStorage.setItem(K_ENTRIES,JSON.stringify(entries));localStorage.setItem(K_ORDER,JSON.stringify(order));}catch(e){}
+  var changedAt=Date.now();
+  try{
+    localStorage.setItem(K_ENTRIES,JSON.stringify(entries));
+    localStorage.setItem(K_ORDER,JSON.stringify(order));
+    localStorage.setItem(K_CHANGED,String(changedAt));
+  }catch(e){
+    storageIssue('Nie udało się zapisać danych lokalnie. Sprawdź dostępne miejsce i uprawnienia przeglądarki.',e);
+    alert('Nie udało się zapisać danych lokalnie. Sprawdź dostępne miejsce i uprawnienia przeglądarki.');
+    return false;
+  }
+  lastChanged=changedAt;
   var s=$('saved'); s.classList.add('on'); clearTimeout(saveT); saveT=setTimeout(function(){s.classList.remove('on');},1300);
+  return true;
 }
-function applyTheme(){document.documentElement.setAttribute('data-theme',theme);$('themeBtn').innerHTML= theme==='dark'?'&#9788;':'&#9789;';try{localStorage.setItem(K_THEME,theme);}catch(e){}}
+function saveCurrentMileage(value){
+  var changedAt=Date.now();
+  try{localStorage.setItem(K_CURRENT_KM,String(value));}
+  catch(e){
+    storageIssue('Nie udało się zapisać aktualnego przebiegu lokalnie.',e);
+    alert('Nie udało się zapisać aktualnego przebiegu lokalnie.');
+    return false;
+  }
+  try{localStorage.setItem(K_CHANGED,String(changedAt));}
+  catch(e){
+    storageIssue('Nie udało się zapisać daty ostatniej zmiany lokalnie.',e);
+    alert('Nie udało się zapisać daty ostatniej zmiany lokalnie.');
+    return false;
+  }
+  currentMileage=value;
+  lastChanged=changedAt;
+  renderTop();
+  var s=$('saved');s.classList.add('on');clearTimeout(saveT);saveT=setTimeout(function(){s.classList.remove('on');},1300);
+  return true;
+}
+function commitCurrentMileage(input){
+  var raw=input.value.trim();
+  if(!/^\d+$/.test(raw)||!Number.isSafeInteger(Number(raw))){
+    alert('Aktualny przebieg musi być nieujemną liczbą całkowitą kilometrów.');
+    renderTop();
+    return false;
+  }
+  return saveCurrentMileage(Number(raw));
+}
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',theme);
+  $('themeBtn').innerHTML= theme==='dark'?'&#9788;':'&#9789;';
+  try{localStorage.setItem(K_THEME,theme);}
+  catch(e){
+    storageIssue('Nie udało się zapisać ustawienia motywu.',e);
+    alert('Nie udało się zapisać ustawienia motywu.');
+  }
+}
+function reportStorageIssues(){
+  if(storageIssues.length){
+    var issues=storageIssues.slice();
+    storageIssues=[];
+    alert(issues.join('\n'));
+  }
+}
+
+function normalizeImportedData(data){
+  if(!data||typeof data!=='object'||!Array.isArray(data.entries)||!data.entries.length){
+    return {error:'Plik musi zawierać niepustą tablicę wpisów.'};
+  }
+  var ids={}, normalized=[];
+  for(var i=0;i<data.entries.length;i++){
+    var e=data.entries[i];
+    if(!e||typeof e!=='object'||!Number.isFinite(Number(e.id))||ids[e.id]||
+       typeof e.title!=='string'||!e.title.trim()||typeof e.category!=='string'||
+       (e.status!=='completed'&&e.status!=='planned')||
+       (e.date!=null&&!/^\d{4}-\d{2}-\d{2}$/.test(e.date))||
+       (e.mileage!=null&&(!Number.isFinite(Number(e.mileage))||Number(e.mileage)<0))||
+       (e.mileageApprox!=null&&typeof e.mileageApprox!=='boolean')||
+       (e.done!=null&&typeof e.done!=='boolean')){
+      return {error:'Wpis '+(i+1)+' ma nieprawidłową strukturę lub wartości.'};
+    }
+    ids[e.id]=true;
+    normalized.push({
+      id:Number(e.id),date:e.date||null,mileage:e.mileage==null?null:Number(e.mileage),
+      mileageApprox:!!e.mileageApprox,category:e.category.trim(),title:e.title.trim(),
+      description:e.description==null?null:String(e.description),
+      cost:e.cost==null?null:String(e.cost),source:e.source==null?null:String(e.source),
+      status:e.status,done:!!e.done
+    });
+  }
+  var importedOrder=Array.isArray(data.plannedOrder)?data.plannedOrder:normalized.filter(function(e){return e.status==='planned';}).map(function(e){return e.id;});
+  if(importedOrder.some(function(id){return !ids[id];})){
+    return {error:'Lista kolejności zawiera identyfikator nieobecny wśród wpisów.'};
+  }
+  return {entries:normalized,order:importedOrder};
+}
 
 /* ---------- data helpers ---------- */
 function plannedOrdered(){
@@ -367,6 +564,37 @@ function plannedOrdered(){
   order.forEach(function(id){if(map[id]){res.push(map[id]);delete map[id];}});
   for(var k in map) rest.push(map[k]);
   return res.concat(rest);
+}
+function descriptionDate(e){
+  var text=String(e.description||''), iso=text.match(/(?:^|[^\d])(\d{4})-(\d{1,2})-(\d{1,2})(?!\d)/), m=iso?null:text.match(/(?:^|[^\d])(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})(?!\d)/);
+  if(iso){m=[iso[0],iso[3],iso[2],iso[1]];}
+  if(!m)return null;
+  var day=+m[1],month=+m[2],year=+m[3];
+  if(month<1||month>12||day<1||day>31)return null;
+  var value=new Date(year,month-1,day);
+  return value.getFullYear()===year&&value.getMonth()===month-1&&value.getDate()===day?value.getTime():null;
+}
+function descriptionMileage(e){
+  var text=String(e.description||''), m=text.match(/(?:^|[^\d])(\d{1,3}(?:[ .]\d{3})+|\d{4,6})\s*km\b/i), thousands=false;
+  if(!m){m=text.match(/(?:^|[^\d])(\d{1,3})\s*tys\.?\s*km\b/i);thousands=true;}
+  if(!m)return null;
+  var value=Number(m[1].replace(/[ .]/g,''));
+  if(thousands)value*=1000;
+  return Number.isFinite(value)?value:null;
+}
+function plannedSorted(list){
+  var mode=$('plannedSort').value;
+  if(mode==='manual')return list;
+  return list.map(function(e,index){return {entry:e,index:index,value:mode==='title'?e.title.toLocaleLowerCase('pl'):mode==='date'?descriptionDate(e):descriptionMileage(e)};})
+    .sort(function(a,b){
+      var am=a.value==null||a.value==='',bm=b.value==null||b.value==='';
+      if(am!==bm)return am?1:-1;
+      if(!am&&a.value!==b.value){
+        if(mode==='title')return a.value.localeCompare(b.value,'pl',{sensitivity:'base'});
+        return a.value-b.value;
+      }
+      return a.index-b.index;
+    }).map(function(item){return item.entry;});
 }
 function filtered(){
   var df=$('fDateFrom').value, dt=$('fDateTo').value, kf=$('fKmFrom').value, kt=$('fKmTo').value;
@@ -401,24 +629,28 @@ function groups(){
 
 /* ---------- render ---------- */
 function renderTop(){
-  var dates=entries.map(function(e){return e.date;}).filter(Boolean).sort();
   var done=entries.filter(function(e){return e.status==='completed'&&e.mileage!=null;});
   var km=done.length?Math.max.apply(null,done.map(function(e){return e.mileage;})):null;
   $('topbar').innerHTML=
-    '<span>&#128663; '+esc(VEHICLE.model)+'</span><span style="opacity:.4">&bull;</span>'+
-    '<span>Wpisów: <b>'+entries.length+'</b></span><span style="opacity:.4">&bull;</span>'+
-    '<span>Zakres dat: <b>'+(dates.length?fmtDate(dates[0])+' \u2013 '+fmtDate(dates[dates.length-1]):'\u2014')+'</b></span><span style="opacity:.4">&bull;</span>'+
-    '<span>Przebieg: <b>'+(km!=null?km.toLocaleString('pl-PL')+' km':'\u2014')+'</b></span><span style="opacity:.4">&bull;</span>'+
-    '<span>Wyświetlane: <b>'+filtered().length+'</b>/'+entries.length+'</span>';
-  $('modelName').textContent=VEHICLE.model;
+    '<span>Ostatni wpis: <b>'+(km!=null?km.toLocaleString('pl-PL')+' km':'\u2014')+'</b></span><span style="opacity:.4">&bull;</span>'+
+    '<span>Aktualny przebieg: <input class="current-km" id="currentMileage" type="number" min="0" step="1" inputmode="numeric" aria-label="Aktualny przebieg w kilometrach" value="'+(currentMileage==null?'':currentMileage)+'" placeholder="km" /></span><span style="opacity:.4">&bull;</span>'+
+    '<span class="change-stamp">Ostatnia zmiana: <b>'+fmtChanged(lastChanged)+'</b></span>';
+  $('modelName').textContent='SEAT LEON CUPRA 5F DSG 300KM (CJXC)';
+}
+function previewMarkup(items,id){
+  if(!items.length)return '';
+  return '<button type="button" class="preview-toggle" data-preview="'+id+'" aria-expanded="false" aria-controls="'+id+'-panel">Podgląd</button>'+
+    '<div class="preview-popover" id="'+id+'-panel" role="region" aria-label="Podgląd szczegółów wizyty">'+
+    '<h3>Pozycje / szczegóły</h3>'+
+    '<ul class="preview-list">'+items.map(function(i){return '<li><span class="pcat">'+esc(i.category)+'</span>'+esc(i.title)+'</li>';}).join('')+'</ul></div>';
 }
 function renderPlanned(){
-  var list=plannedOrdered(), ul=$('plannedList'), h='';
-  $('plannedNote').textContent='('+list.filter(function(e){return e.done;}).length+'/'+list.length+' wykonane \u00b7 przeciągnij, aby zmienić kolejność)';
+  var manual=$('plannedSort').value==='manual', list=plannedSorted(plannedOrdered()), ul=$('plannedList'), h='';
+  $('plannedNote').textContent='('+list.filter(function(e){return e.done;}).length+'/'+list.length+' wykonane'+(manual?' \u00b7 przeciągnij, aby zmienić kolejność':' \u00b7 sortowanie nie zmienia kolejności ręcznej')+')';
   if(!list.length){ul.innerHTML='<li style="border:0;background:none;color:var(--faint);cursor:default">Brak zaplanowanych czynności.</li>';return;}
   list.forEach(function(e,i){
     var d = e.mileage!=null ? 'przy '+e.mileage.toLocaleString('pl-PL')+' km' : (e.date?'do '+fmtDate(e.date):'');
-    h+='<li draggable="true" data-i="'+i+'" data-id="'+e.id+'" class="'+(e.done?'done':'')+'">'+
+    h+='<li draggable="'+(manual?'true':'false')+'" data-i="'+i+'" data-id="'+e.id+'" class="'+(e.done?'done':'')+'">'+
        '<span class="grip">&#8942;&#8942;</span>'+
        '<button class="tick '+(e.done?'on':'')+'" data-tick="'+e.id+'" title="Oznacz jako wykonane">'+(e.done?'&#10003;':'&#9711;')+'</button>'+
        '<span class="ptxt"><span class="t">'+esc(e.title)+'</span> <span class="c">\u00b7 '+esc(e.category)+'</span>'+
@@ -437,7 +669,12 @@ function renderTable(){
   $('visitCount').textContent='Historia serwisowa \u2014 '+gs.length+' '+(gs.length===1?'wizyta':'wizyt');
   var allOpen=gs.length>0&&gs.every(function(g){return expanded[g.key];});
   $('expandAll').textContent=allOpen?'Zwiń wszystkie':'Rozwiń wszystkie';
-  if(!gs.length){$('tbody').innerHTML='<tr><td colspan="6" class="empty">Brak wpisów spełniających kryteria filtrów.</td></tr>';return;}
+  updateMobileSortControls();
+  if(!gs.length){
+    $('tbody').innerHTML='<tr><td colspan="6" class="empty">Brak wpisów spełniających kryteria filtrów.</td></tr>';
+    $('mobileHistory').innerHTML='<div class="empty">Brak wpisów spełniających kryteria filtrów.</div>';
+    return;
+  }
   gs.forEach(function(g){
     var open=!!expanded[g.key];
     var sum=g.items.reduce(function(s,i){return s+parseCost(i.cost);},0);
@@ -446,9 +683,10 @@ function renderTable(){
        '<td style="text-align:center;color:var(--muted)">'+(open?'&#9662;':'&#9656;')+'</td>'+
        '<td><strong>'+fmtDate(g.date)+'</strong></td>'+
        '<td style="white-space:nowrap">'+fmtKm(g.mileage,g.approx)+'</td>'+
-       '<td><span class="cnt">'+g.items.length+' '+(g.items.length===1?'pozycja':'pozycje')+'</span>'+
-       g.items.slice(0,3).map(function(i){return '<span class="cat'+(selCats.indexOf(i.category)>=0?' sel':'')+'">'+esc(i.category)+'</span>';}).join('')+
-       (g.items.length>3?'<span style="color:var(--faint);font-size:11px">+'+(g.items.length-3)+'</span>':'')+'</td>'+
+       '<td><div class="preview-wrap"><span class="cnt">'+g.items.length+' '+(g.items.length===1?'pozycja':'pozycje')+'</span>'+
+       g.items.slice(0,2).map(function(i){return '<span class="cat'+(selCats.indexOf(i.category)>=0?' sel':'')+'">'+esc(i.category)+'</span>';}).join('')+
+       (g.items.length>2?'<span style="color:var(--faint);font-size:11px">+'+(g.items.length-2)+'</span>':'')+
+       previewMarkup(g.items.slice(2),'desktop-preview-'+gs.indexOf(g))+'</div></td>'+
        '<td style="white-space:nowrap">'+(sum>0?sum.toLocaleString('pl-PL')+' zł':'\u2014')+'</td>'+
        '<td style="text-align:right;color:var(--faint);font-size:11px">'+(open?'zwiń':'rozwiń')+'</td></tr>';
     if(open){
@@ -461,6 +699,7 @@ function renderTable(){
             '<div class="span2"><label class="fl">Czynność</label><input id="e_title" value="'+esc(e.title)+'" /></div>'+
             '<div><label class="fl">Koszt</label><input id="e_cost" value="'+esc(e.cost||'')+'" /></div>'+
             '<div class="span2"><label class="fl">Opis</label><textarea id="e_desc" rows="2">'+esc(e.description||'')+'</textarea></div>'+
+            '<div class="span2"><label class="fl">Źródło / link</label><input id="e_src" value="'+esc(e.source||'')+'" /></div>'+
             '<div><label class="fl">Status</label><select id="e_st"><option value="completed"'+(e.status==='completed'?' selected':'')+'>wykonane</option><option value="planned"'+(e.status==='planned'?' selected':'')+'>planowane</option></select></div>'+
             '</div><div class="foot" style="justify-content:flex-start;margin-top:12px">'+
             '<button class="btn sm" data-saveedit="'+e.id+'" style="color:var(--green)">&#10003; Zapisz</button>'+
@@ -491,7 +730,11 @@ function renderMobileHistory(gs){
     h+='<div class="mobile-visit" data-mg="'+esc(g.key)+'">'+
       '<div class="mobile-summary">'+
       '<span class="mobile-chevron">'+(open?'&#9662;':'&#9656;')+'</span>'+
-      '<div><div class="mobile-date">'+fmtDate(g.date)+'</div><div class="mobile-km">'+fmtKm(g.mileage,g.approx)+'</div></div>'+
+      '<div class="mobile-summary-main"><div class="mobile-fields">'+
+      '<div class="mobile-field"><span class="mobile-field-label">Data</span><div class="mobile-date">'+fmtDate(g.date)+'</div></div>'+
+      '<div class="mobile-field"><span class="mobile-field-label">Przebieg</span><div class="mobile-km">'+fmtKm(g.mileage,g.approx)+'</div></div></div>'+
+      '<div class="mobile-categories">'+g.items.slice(0,2).map(function(i){return '<span class="mobile-category'+(selCats.indexOf(i.category)>=0?' sel':'')+'" title="'+esc(i.category)+'">'+esc(i.category)+'</span>';}).join('')+
+      (g.items.length>2?'<span class="mobile-category">+'+(g.items.length-2)+' więcej</span>':'')+'</div></div>'+
       '<span class="mobile-count">'+g.items.length+' '+(g.items.length===1?'pozycja':'pozycje')+'</span></div>';
     if(open){
       h+='<div class="mobile-items">';
@@ -510,11 +753,45 @@ function renderMobileHistory(gs){
   });
   $('mobileHistory').innerHTML=h;
 }
+function updateMobileSortControls(){
+  var buttons=document.querySelectorAll('[data-mobile-sort]');
+  for(var i=0;i<buttons.length;i++){
+    var active=buttons[i].getAttribute('data-mobile-sort')===sortKey;
+    buttons[i].classList.toggle('active',active);
+    var arrow=buttons[i].querySelector('.ar');
+    if(arrow)arrow.textContent=active?(sortDir==='asc'?'↑':'↓'):'↕';
+  }
+}
+function closePreviews(except){
+  var open=document.querySelectorAll('.preview-popover.open');
+  for(var i=0;i<open.length;i++){
+    if(except&&open[i]===except)continue;
+    open[i].classList.remove('open');
+    var button=document.querySelector('[aria-controls="'+open[i].id+'"]');
+    if(button)button.setAttribute('aria-expanded','false');
+  }
+}
+function togglePreview(button){
+  var panel=$(button.getAttribute('aria-controls'));
+  if(!panel)return;
+  var open=!panel.classList.contains('open');
+  closePreviews(panel);
+  panel.classList.toggle('open',open);
+  button.setAttribute('aria-expanded',open?'true':'false');
+}
 function renderAll(){renderTop();renderPlanned();renderCats();renderTable();}
 
 /* ---------- planned actions ---------- */
 function toggleDone(id){entries.forEach(function(e){if(e.id===id)e.done=!e.done;});save();renderPlanned();}
 function removeEntry(id){entries=entries.filter(function(e){return e.id!==id;});order=order.filter(function(o){return o!==id;});save();renderAll();}
+function requestPlannedDelete(id){
+  var target=entries.find(function(e){return e.id===id&&e.status==='planned';});
+  if(!target)return;
+  plannedDeleteId=id;
+  $('plannedDeleteText').textContent='Ta czynność zostanie usunięta z listy nadchodzących czynności: „'+target.title+'”.';
+  $('ovPlannedDelete').classList.add('on');
+  $('cancelPlannedDelete').focus();
+}
 
 /* ---------- export / import ---------- */
 function dl(blob,name){var u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);}
@@ -649,17 +926,21 @@ $('clearF').addEventListener('click',function(){
 $('importFile').addEventListener('change',function(){
   var f=this.files[0];if(!f)return;var r=new FileReader();
   r.onload=function(){try{
-    var p=JSON.parse(r.result);
-    if(p&&p.entries&&p.entries.length){
-      entries=p.entries;
-      order=p.plannedOrder||entries.filter(function(e){return e.status==='planned';}).map(function(e){return e.id;});
-      nextId=Math.max.apply(null,entries.map(function(e){return e.id;}).concat([0]))+1;
-      save();renderAll();
-    }
-  }catch(err){alert('Nie udało się wczytać pliku - nieprawidłowy format.');}};
+    var imported=normalizeImportedData(JSON.parse(r.result));
+    if(imported.error){alert('Nie udało się wczytać pliku: '+imported.error);return;}
+    entries=imported.entries;order=imported.order;
+    nextId=Math.max.apply(null,entries.map(function(e){return e.id;}).concat([0]))+1;
+    if(save())renderAll();
+  }catch(err){console.error('Import danych nie powiódł się.',err);alert('Nie udało się wczytać pliku: nieprawidłowy JSON.');}};
   r.readAsText(f);this.value='';
 });
 $('addBtn').addEventListener('click',openAdd);
+$('topbar').addEventListener('keydown',function(e){
+  if(e.target.id==='currentMileage'&&e.key==='Enter'){e.preventDefault();commitCurrentMileage(e.target);e.target.blur();}
+});
+$('topbar').addEventListener('blur',function(e){
+  if(e.target.id==='currentMileage')commitCurrentMileage(e.target);
+},true);
 $('filterToggle').addEventListener('click',function(){
   var body=$('filterBody'), hidden=body.classList.contains('hidden-mobile');
   body.classList.toggle('hidden-mobile',!hidden);
@@ -672,17 +953,29 @@ $('doReset').addEventListener('click',function(){
   nextId=Math.max.apply(null,entries.map(function(e){return e.id;}).concat([0]))+1;
   save();renderAll();$('ovReset').classList.remove('on');
 });
+$('confirmPlannedDelete').addEventListener('click',function(){
+  if(plannedDeleteId==null)return;
+  var id=plannedDeleteId;
+  plannedDeleteId=null;
+  $('ovPlannedDelete').classList.remove('on');
+  removeEntry(id);
+});
 document.addEventListener('click',function(e){
   var c=e.target.getAttribute&&e.target.getAttribute('data-close');
-  if(c)$(c).classList.remove('on');
+  if(c){
+    $(c).classList.remove('on');
+    if(c==='ovPlannedDelete')plannedDeleteId=null;
+  }
   if(e.target.classList&&e.target.classList.contains('ov'))e.target.classList.remove('on');
+  if(e.target.id==='ovPlannedDelete')plannedDeleteId=null;
 });
 $('taskToggle').addEventListener('click',function(){
-  var f=$('taskForm');f.classList.toggle('hidden');
-  if(!f.classList.contains('hidden'))$('tfTitle').focus();
+  var f=$('taskForm');f.classList.toggle('on');
+  if(f.classList.contains('on'))$('tfTitle').focus();
 });
+$('plannedSort').addEventListener('change',function(){renderPlanned();});
 $('tfCancel').addEventListener('click',function(){
-  $('taskForm').classList.add('hidden');
+  $('taskForm').classList.remove('on');
   ['tfTitle','tfMileage','tfDate','tfDesc'].forEach(function(i){$(i).value='';});
 });
 $('tfAdd').addEventListener('click',function(){
@@ -692,11 +985,11 @@ $('tfAdd').addEventListener('click',function(){
     cost:null,source:null,status:'planned',done:false};
   entries.push(e);order.push(e.id);
   ['tfTitle','tfMileage','tfDate','tfDesc'].forEach(function(i){$(i).value='';});
-  $('taskForm').classList.add('hidden');save();renderAll();
+  $('taskForm').classList.remove('on');save();renderAll();
 });
 $('plannedList').addEventListener('click',function(e){
   var t=e.target.closest('[data-tick]');if(t){toggleDone(+t.getAttribute('data-tick'));return;}
-  var d=e.target.closest('[data-delid]');if(d){removeEntry(+d.getAttribute('data-delid'));}
+  var d=e.target.closest('[data-delid]');if(d){requestPlannedDelete(+d.getAttribute('data-delid'));}
 });
 $('expandAll').addEventListener('click',function(){
   var gs=groups(),allOpen=gs.length>0&&gs.every(function(g){return expanded[g.key];});
@@ -709,7 +1002,15 @@ document.querySelector('thead').addEventListener('click',function(e){
   if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=k;sortDir='asc';}
   renderTable();
 });
+document.querySelector('.mobile-sort-controls').addEventListener('click',function(e){
+  var b=e.target.closest('[data-mobile-sort]');if(!b)return;
+  var k=b.getAttribute('data-mobile-sort');
+  if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=k;sortDir='asc';}
+  renderTable();
+});
 $('mobileHistory').addEventListener('click',function(e){
+  var preview=e.target.closest('[data-preview]');
+  if(preview){e.stopPropagation();togglePreview(preview);return;}
   var ed=e.target.closest('[data-edit]');
   if(ed){
     var id=+ed.getAttribute('data-edit'), x=null;
@@ -729,6 +1030,8 @@ $('mobileHistory').addEventListener('click',function(e){
   if(v){var k=v.getAttribute('data-mg');expanded[k]=!expanded[k];renderTable();}
 });
 $('tbody').addEventListener('click',function(e){
+  var preview=e.target.closest('[data-preview]');
+  if(preview){e.stopPropagation();togglePreview(preview);return;}
   var se=e.target.closest('[data-saveedit]');
   if(se){
     var id=+se.getAttribute('data-saveedit');
@@ -740,8 +1043,15 @@ $('tbody').addEventListener('click',function(e){
       x.title=$('e_title').value;
       x.cost=$('e_cost').value||null;
       x.description=$('e_desc').value||null;
+      x.source=$('e_src').value.trim()||null;
       x.status=$('e_st').value;
-      if(x.status==='planned'&&order.indexOf(x.id)<0)order.push(x.id);
+      if(x.status==='planned'){
+        x.done=!!x.done;
+        if(order.indexOf(x.id)<0)order.push(x.id);
+      }else{
+        x.done=false;
+        order=order.filter(function(orderId){return orderId!==x.id;});
+      }
     }});
     editingId=null;save();renderAll();return;
   }
@@ -750,21 +1060,30 @@ $('tbody').addEventListener('click',function(e){
   var dl2=e.target.closest('[data-delid]');if(dl2){removeEntry(+dl2.getAttribute('data-delid'));return;}
   var g=e.target.closest('[data-g]');if(g){var k=g.getAttribute('data-g');expanded[k]=!expanded[k];renderTable();}
 });
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.preview-wrap'))closePreviews();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')closePreviews();
+});
 
 /* drag & drop */
 var dragIdx=null;
 $('plannedList').addEventListener('dragstart',function(e){
+  if($('plannedSort').value!=='manual')return;
   var li=e.target.closest('li[data-i]');if(!li)return;
   dragIdx=+li.getAttribute('data-i');li.classList.add('dragging');
   try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','x');}catch(err){}
 });
 $('plannedList').addEventListener('dragover',function(e){
+  if($('plannedSort').value!=='manual')return;
   e.preventDefault();var li=e.target.closest('li[data-i]');if(!li)return;
   var all=$('plannedList').querySelectorAll('li');
   for(var i=0;i<all.length;i++)all[i].classList.remove('over');
   if(+li.getAttribute('data-i')!==dragIdx)li.classList.add('over');
 });
 $('plannedList').addEventListener('drop',function(e){
+  if($('plannedSort').value!=='manual')return;
   e.preventDefault();var li=e.target.closest('li[data-i]');if(!li||dragIdx==null)return;
   var to=+li.getAttribute('data-i');
   if(to!==dragIdx){
@@ -779,8 +1098,7 @@ $('plannedList').addEventListener('dragend',function(){
   for(var i=0;i<all.length;i++){all[i].classList.remove('over');all[i].classList.remove('dragging');}
 });
 
-applyTheme();renderAll();
+applyTheme();renderAll();reportStorageIssues();
 </script>
 </body>
 </html>
-
