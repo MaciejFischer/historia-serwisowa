@@ -57,7 +57,7 @@
   .menu button:hover,.menu label:hover{background:var(--hover)}
   .menu .sep{height:1px;background:var(--border);margin:6px 4px}
   .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:30px;box-shadow:var(--card-shadow)}
-  .card .pad{padding:18px}
+  .card.pad,.card .pad{padding:18px}
   .ttl{font-size:12px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .ttl .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--faint);font-size:12px}
   .planned-tools{display:flex;align-items:center;gap:8px;margin-left:auto}
@@ -69,6 +69,10 @@
   #plannedList li{display:flex;align-items:flex-start;gap:10px;padding:10px 11px;border:1px solid var(--border);background:var(--card2);border-radius:10px;cursor:grab;user-select:none;transition:background .15s,border-color .15s,opacity .15s}
   #plannedList li:hover{background:var(--hover)}
   #plannedList li.done{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.45)}
+  #plannedList li.planned-warning{background:rgba(245,158,11,.12);border-color:var(--accent)}
+  #plannedList li.planned-warning:hover{background:rgba(245,158,11,.18)}
+  .planned-warning-badge{display:inline-flex;align-items:center;gap:4px;color:#b45309;font-size:11px;font-weight:700;margin-left:6px;white-space:nowrap}
+  html[data-theme="dark"] .planned-warning-badge{color:#fbbf24}
   #plannedList li.dragging{opacity:.4;border-color:var(--accent)}
   #plannedList li.over{background:rgba(245,158,11,.12);border-color:var(--accent)}
   .grip{color:var(--faint);line-height:1;margin-top:2px}
@@ -206,7 +210,7 @@
     .tools .menuwrap .btn{width:100%;justify-content:center}
     .tools #addBtn{width:100%;justify-content:center;padding:9px 8px;font-size:13px}
     .card{border-radius:13px;margin-bottom:22px}
-    .card .pad{padding:13px}
+    .card.pad,.card .pad{padding:13px}
     #plannedCard{height:40vh;min-height:260px}
     #plannedList li{padding:11px 10px;gap:9px}
     .ptxt{font-size:13px}
@@ -582,6 +586,28 @@ function descriptionMileage(e){
   if(thousands)value*=1000;
   return Number.isFinite(value)?value:null;
 }
+var PLANNED_WARNING_MILEAGE=5000, PLANNED_WARNING_DAYS=30;
+function warningMileage(){
+  if(Number.isFinite(currentMileage)&&currentMileage>=0)return currentMileage;
+  var done=entries.filter(function(e){return e.status==='completed'&&Number.isFinite(e.mileage)&&e.mileage>=0;});
+  return done.length?Math.max.apply(null,done.map(function(e){return e.mileage;})):null;
+}
+function localDateValue(value){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return null;
+  var p=value.split('-'), date=new Date(+p[0],+p[1]-1,+p[2]);
+  return date.getFullYear()===+p[0]&&date.getMonth()===+p[1]-1&&date.getDate()===+p[2]?date:null;
+}
+function plannedWarning(e,todayDate){
+  if(e.done)return [];
+  var reasons=[], km=warningMileage();
+  if(e.mileage!=null&&km!=null&&Number(e.mileage)<=km+PLANNED_WARNING_MILEAGE)reasons.push('przebieg');
+  var due=localDateValue(e.date);
+  if(due){
+    var limit=new Date(todayDate.getFullYear(),todayDate.getMonth(),todayDate.getDate()+PLANNED_WARNING_DAYS);
+    if(due<=limit)reasons.push('termin');
+  }
+  return reasons;
+}
 function plannedSorted(list){
   var mode=$('plannedSort').value;
   if(mode==='manual')return list;
@@ -646,14 +672,20 @@ function previewMarkup(items,id){
 }
 function renderPlanned(){
   var manual=$('plannedSort').value==='manual', list=plannedSorted(plannedOrdered()), ul=$('plannedList'), h='';
+  var todayDate=new Date(), referenceMileage=warningMileage();
+  todayDate=new Date(todayDate.getFullYear(),todayDate.getMonth(),todayDate.getDate());
   $('plannedNote').textContent='('+list.filter(function(e){return e.done;}).length+'/'+list.length+' wykonane'+(manual?' \u00b7 przeciągnij, aby zmienić kolejność':' \u00b7 sortowanie nie zmienia kolejności ręcznej')+')';
   if(!list.length){ul.innerHTML='<li style="border:0;background:none;color:var(--faint);cursor:default">Brak zaplanowanych czynności.</li>';return;}
   list.forEach(function(e,i){
     var d = e.mileage!=null ? 'przy '+e.mileage.toLocaleString('pl-PL')+' km' : (e.date?'do '+fmtDate(e.date):'');
-    h+='<li draggable="'+(manual?'true':'false')+'" data-i="'+i+'" data-id="'+e.id+'" class="'+(e.done?'done':'')+'">'+
+    var warningReasons=plannedWarning(e,todayDate), warning=warningReasons.length>0;
+    var warningText=warningReasons.length===2?'Pilne: przebieg i termin':warningReasons[0]==='przebieg'?'Pilne: przebieg':'Pilne: termin';
+    var warningTitle=warningText+(referenceMileage!=null?' (aktualny przebieg: '+referenceMileage.toLocaleString('pl-PL')+' km)':'');
+    h+='<li draggable="'+(manual?'true':'false')+'" data-i="'+i+'" data-id="'+e.id+'" class="'+(e.done?'done ':'')+(warning?'planned-warning':'')+'"'+(warning?' title="'+esc(warningTitle)+'"':'')+'>'+
        '<span class="grip">&#8942;&#8942;</span>'+
        '<button class="tick '+(e.done?'on':'')+'" data-tick="'+e.id+'" title="Oznacz jako wykonane">'+(e.done?'&#10003;':'&#9711;')+'</button>'+
        '<span class="ptxt"><span class="t">'+esc(e.title)+'</span> <span class="c">\u00b7 '+esc(e.category)+'</span>'+
+       (warning?'<span class="planned-warning-badge" aria-label="'+esc(warningText)+'">&#9888; '+esc(warningText)+'</span>':'')+
        (d?' <span class="d">\u2014 '+esc(d)+'</span>':(e.description?' <span class="d">\u2014 '+esc(e.description)+'</span>':''))+'</span>'+
        '<button class="del" data-delid="'+e.id+'" title="Usuń zadanie">&#128465;</button></li>';
   });
