@@ -467,7 +467,7 @@ function fmtChanged(ts){
 }
 function parseCost(c){if(!c)return 0;var m=String(c).match(/[\d]+([.,]\d+)?/);return m?parseFloat(m[0].replace(',','.')):0;}
 
-var saveT;
+var saveT, plannedWarningRefreshT;
 function save(){
   var changedAt=Date.now();
   try{
@@ -500,6 +500,7 @@ function saveCurrentMileage(value){
   currentMileage=value;
   lastChanged=changedAt;
   renderTop();
+  renderPlanned();
   var s=$('saved');s.classList.add('on');clearTimeout(saveT);saveT=setTimeout(function(){s.classList.remove('on');},1300);
   return true;
 }
@@ -690,6 +691,15 @@ function renderPlanned(){
        '<button class="del" data-delid="'+e.id+'" title="Usuń zadanie">&#128465;</button></li>';
   });
   ul.innerHTML=h;
+}
+function schedulePlannedWarningRefresh(){
+  clearTimeout(plannedWarningRefreshT);
+  var nextDay=new Date();
+  nextDay.setHours(24,0,0,1000);
+  plannedWarningRefreshT=setTimeout(function(){
+    renderPlanned();
+    schedulePlannedWarningRefresh();
+  },Math.max(1000,nextDay.getTime()-Date.now()));
 }
 function renderCats(){
   $('catBtn').innerHTML='Kategorie'+(selCats.length?' ('+selCats.length+')':'')+' &#9662;';
@@ -1006,6 +1016,12 @@ $('taskToggle').addEventListener('click',function(){
   if(f.classList.contains('on'))$('tfTitle').focus();
 });
 $('plannedSort').addEventListener('change',function(){renderPlanned();});
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden){
+    renderPlanned();
+    schedulePlannedWarningRefresh();
+  }
+});
 $('tfCancel').addEventListener('click',function(){
   $('taskForm').classList.remove('on');
   ['tfTitle','tfMileage','tfDate','tfDesc'].forEach(function(i){$(i).value='';});
@@ -1130,7 +1146,7 @@ $('plannedList').addEventListener('dragend',function(){
   for(var i=0;i<all.length;i++){all[i].classList.remove('over');all[i].classList.remove('dragging');}
 });
 
-applyTheme();renderAll();reportStorageIssues();
+applyTheme();renderAll();schedulePlannedWarningRefresh();reportStorageIssues();
 </script>
 </body>
 </html>

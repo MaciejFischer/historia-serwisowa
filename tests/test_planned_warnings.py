@@ -19,6 +19,14 @@ class PlannedWarningValidation(unittest.TestCase):
         self.assertIn("planned-warning-badge", SOURCE)
         self.assertIn("warningReasons=plannedWarning(e,todayDate)", SOURCE)
 
+    def test_warning_refreshes_after_mileage_and_at_day_boundary(self):
+        self.assertIn("currentMileage=value;\n  lastChanged=changedAt;\n  renderTop();\n  renderPlanned();", SOURCE)
+        self.assertIn("function schedulePlannedWarningRefresh()", SOURCE)
+        self.assertIn("clearTimeout(plannedWarningRefreshT);", SOURCE)
+        self.assertIn("nextDay.setHours(24,0,0,1000);", SOURCE)
+        self.assertIn("renderPlanned();\n    schedulePlannedWarningRefresh();", SOURCE)
+        self.assertIn("applyTheme();renderAll();schedulePlannedWarningRefresh();", SOURCE)
+
 
 if __name__ == "__main__":
     unittest.main()
