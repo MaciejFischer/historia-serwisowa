@@ -27,6 +27,13 @@ class PlannedWarningValidation(unittest.TestCase):
         self.assertIn("renderPlanned();\n    schedulePlannedWarningRefresh();", SOURCE)
         self.assertIn("applyTheme();renderAll();schedulePlannedWarningRefresh();", SOURCE)
 
+    def test_current_mileage_has_accessible_formatted_display(self):
+        self.assertIn("function fmtCurrentMileage(m){return m==null?'\\u2014':m.toLocaleString('pl-PL')+' km';}", SOURCE)
+        self.assertIn('class="current-km-wrap"', SOURCE)
+        self.assertIn('class="current-km-display" id="currentMileageDisplay" aria-live="polite"', SOURCE)
+        self.assertIn("fmtCurrentMileage(currentMileage)", SOURCE)
+        self.assertIn('aria-label="Edytuj aktualny przebieg w kilometrach"', SOURCE)
+
 
 if __name__ == "__main__":
     unittest.main()

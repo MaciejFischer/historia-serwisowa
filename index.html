@@ -27,7 +27,9 @@
   @media(min-width:768px){.wrap{padding:28px 28px 42px}}
   .topbar{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:12px;color:var(--faint);border-bottom:1px solid var(--border);padding:0 2px 11px;margin-bottom:24px}
   .topbar b{color:var(--muted);font-weight:650}
+  .current-km-wrap{display:inline-flex;align-items:center;gap:8px}
   .current-km{width:92px;padding:3px 6px;font-size:12px;border-radius:6px}
+  .current-km-display{font-size:16px;font-weight:750;letter-spacing:-.01em;color:var(--fg);white-space:nowrap}
   .change-stamp{white-space:nowrap}
   header.app{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:24px}
   .brand{display:flex;align-items:center;gap:14px}
@@ -201,6 +203,8 @@
   @media(max-width:767px){
     .wrap{padding:12px}
     .topbar{font-size:12px;line-height:1.45;margin-bottom:14px}
+    .current-km-wrap{gap:6px}
+    .current-km-display{font-size:15px}
     header.app{margin-bottom:14px;gap:10px}
     .brand .ico{width:60px;height:60px}
     h1{font-size:22px}
@@ -461,6 +465,7 @@ var $=function(id){return document.getElementById(id);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function fmtDate(d){if(!d)return '\u2014';var p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function fmtKm(m,a){if(m==null)return '\u2014';return m.toLocaleString('pl-PL')+' km'+(a?' (szac.)':'');}
+function fmtCurrentMileage(m){return m==null?'\u2014':m.toLocaleString('pl-PL')+' km';}
 function fmtChanged(ts){
   if(!ts)return '\u2014';
   return new Date(ts).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'});
@@ -660,7 +665,7 @@ function renderTop(){
   var km=done.length?Math.max.apply(null,done.map(function(e){return e.mileage;})):null;
   $('topbar').innerHTML=
     '<span>Ostatni wpis: <b>'+(km!=null?km.toLocaleString('pl-PL')+' km':'\u2014')+'</b></span><span style="opacity:.4">&bull;</span>'+
-    '<span>Aktualny przebieg: <input class="current-km" id="currentMileage" type="number" min="0" step="1" inputmode="numeric" aria-label="Aktualny przebieg w kilometrach" value="'+(currentMileage==null?'':currentMileage)+'" placeholder="km" /></span><span style="opacity:.4">&bull;</span>'+
+    '<span class="current-km-wrap"><span>Aktualny przebieg:</span><input class="current-km" id="currentMileage" type="number" min="0" step="1" inputmode="numeric" aria-label="Edytuj aktualny przebieg w kilometrach" value="'+(currentMileage==null?'':currentMileage)+'" placeholder="km" /><output class="current-km-display" id="currentMileageDisplay" aria-live="polite" aria-label="Aktualny przebieg">'+fmtCurrentMileage(currentMileage)+'</output></span><span style="opacity:.4">&bull;</span>'+
     '<span class="change-stamp">Ostatnia zmiana: <b>'+fmtChanged(lastChanged)+'</b></span>';
   $('modelName').textContent='SEAT LEON CUPRA 5F DSG 300KM (CJXC)';
 }
