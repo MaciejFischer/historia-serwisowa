@@ -29,7 +29,10 @@ class RequestedFeatureValidation(unittest.TestCase):
         self.assertIn('id="mServicePlace" list="servicePlaceSuggestions"', SOURCE)
         for place in ("EK Racing", "EK Racing Gdańsk", "Maran", "Carsed", "TGE Auto"):
             self.assertIn('value="'+place+'"', SOURCE)
-        self.assertIn("backfillSeedServicePlaces();", SOURCE)
+        self.assertIn("backfillServicePlaces(SEED.entries);", SOURCE)
+        self.assertIn("var servicePlacesNeedSave=backfillServicePlaces(entries);", SOURCE)
+        self.assertIn("if(servicePlacesNeedSave){save();renderTop();}", SOURCE)
+        self.assertIn("backfillServicePlaces(imported.entries);", SOURCE)
         self.assertIn("if(Object.prototype.hasOwnProperty.call(e,'servicePlace'))", SOURCE)
         self.assertIn("normalizedEntry.servicePlace=e.servicePlace==null?null:e.servicePlace.trim()||null", SOURCE)
         self.assertIn("if(e.servicePlace)L.push('   Miejsce / warsztat: '+e.servicePlace);", SOURCE)
