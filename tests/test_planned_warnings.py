@@ -25,7 +25,8 @@ class PlannedWarningValidation(unittest.TestCase):
         self.assertIn("clearTimeout(plannedWarningRefreshT);", SOURCE)
         self.assertIn("nextDay.setHours(24,0,0,1000);", SOURCE)
         self.assertIn("renderPlanned();\n    schedulePlannedWarningRefresh();", SOURCE)
-        self.assertIn("applyTheme();renderAll();schedulePlannedWarningRefresh();", SOURCE)
+        self.assertIn("applyTheme();renderAll();", SOURCE)
+        self.assertIn("schedulePlannedWarningRefresh();reportStorageIssues();", SOURCE)
 
     def test_current_mileage_has_accessible_formatted_display(self):
         self.assertIn("function fmtCurrentMileage(m){return m==null?'\\u2014':m.toLocaleString('pl-PL')+' km';}", SOURCE)
