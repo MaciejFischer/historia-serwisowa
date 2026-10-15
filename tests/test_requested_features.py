@@ -48,6 +48,10 @@ class RequestedFeatureValidation(unittest.TestCase):
         self.assertIn("if(e.target.id!=='catSearch')return;", SOURCE)
         self.assertIn("normalizedSearchText(category).indexOf(query)<0", SOURCE)
 
+    def test_planned_list_hides_only_trailing_planned_suffix(self):
+        self.assertIn("function plannedDisplayTitle(title){return String(title||'').replace(/\\s*\\(planowana\\)\\s*$/i,'');}", SOURCE)
+        self.assertIn("esc(plannedDisplayTitle(e.title))", SOURCE)
+
 
 if __name__ == "__main__":
     unittest.main()

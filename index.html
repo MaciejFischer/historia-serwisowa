@@ -764,7 +764,7 @@ function renderPlanned(){
     h+='<li draggable="'+(manual?'true':'false')+'" data-i="'+i+'" data-id="'+e.id+'" class="'+(e.done?'done ':'')+(warning?'planned-warning':'')+'"'+(warning?' title="'+esc(warningTitle)+'"':'')+'>'+
        '<span class="grip">&#8942;&#8942;</span>'+
        '<button class="tick '+(e.done?'on':'')+'" data-tick="'+e.id+'" title="Oznacz jako wykonane">'+(e.done?'&#10003;':'&#9711;')+'</button>'+
-       '<span class="ptxt"><span class="t">'+esc(e.title)+'</span> <span class="c">\u00b7 '+esc(e.category)+'</span>'+
+       '<span class="ptxt"><span class="t">'+esc(plannedDisplayTitle(e.title))+'</span> <span class="c">\u00b7 '+esc(e.category)+'</span>'+
        (warning?'<span class="planned-warning-badge" aria-label="'+esc(warningText)+'">&#9888; '+esc(warningText)+'</span>':'')+
        (d?' <span class="d">\u2014 '+esc(d)+'</span>':(e.description?' <span class="d">\u2014 '+esc(e.description)+'</span>':''))+'</span>'+
        '<button class="del" data-delid="'+e.id+'" title="Usuń zadanie">&#128465;</button></li>';
@@ -787,6 +787,7 @@ function renderCats(){
   $('catMenu').innerHTML='<div class="filter-menu-search"><label class="sr-only" for="catSearch">Szukaj kategorii</label><input id="catSearch" type="search" placeholder="Wpisz nazwę kategorii…" autocomplete="off" value="'+esc($('catSearch')?$('catSearch').value:'')+'" /></div>'+
     CATS.map(function(c){return '<label class="cat-option'+(query&&normalizedSearchText(c).indexOf(query)<0?' hidden':'')+'"><input type="checkbox" data-cat="'+esc(c)+'"'+(selCats.indexOf(c)>=0?' checked':'')+' /> '+esc(c)+'</label>';}).join('');
 }
+function plannedDisplayTitle(title){return String(title||'').replace(/\s*\(planowana\)\s*$/i,'');}
 function renderPlaces(){
   var places=Array.from(new Set(entries.map(function(e){return e.servicePlace&&e.servicePlace.trim();}).filter(Boolean)))
     .sort(function(a,b){return a.localeCompare(b,'pl',{sensitivity:'base'});});
