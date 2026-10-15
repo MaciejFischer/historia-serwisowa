@@ -157,6 +157,9 @@
   .hint{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:6px}
   .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
   .hidden{display:none !important}
+  .reminder-options{padding:10px 12px;border:1px solid var(--border);border-radius:9px;background:var(--card2)}
+  .reminder-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  @media(max-width:767px){.reminder-fields{grid-template-columns:1fr}}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   /* custom picker (matches artifact UI) */
   .picker{position:relative}
@@ -171,6 +174,11 @@
   .pickitem.done .nm{color:var(--green);font-weight:600}
   .pickitem .meta{color:var(--faint);font-size:11px}
   .pickmenu .sep{height:1px;background:var(--border);margin:5px 4px}
+  .picksearch{position:sticky;top:0;z-index:1;padding:6px;background:var(--card);border-bottom:1px solid var(--border)}
+  .picksearch input{padding:7px 9px}
+  .pickempty{padding:12px;color:var(--muted);font-size:12px;text-align:center}
+  .filter-menu-search{position:sticky;top:-6px;z-index:1;padding:6px;background:var(--card);border-bottom:1px solid var(--border)}
+  .filter-menu-search input{padding:7px 9px}
   .alink{display:inline-block;background:none;border:0;padding:0;margin-top:7px;color:var(--accent);font:inherit;font-size:12px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
   .note-box{font-size:12px;color:var(--faint);text-align:center;padding:4px 0 24px}
   /* Mobile-first view: compact cards instead of a horizontally scrolling table */
@@ -196,6 +204,7 @@
   .mobile-item:first-child{border-top:0}
   .mobile-item .cat{margin:0 0 5px 0}
   .mobile-item .ititle{font-weight:650;line-height:1.4}
+  .service-place{color:var(--muted);font-size:12px;margin-top:3px}
   .mobile-item .idesc{color:var(--muted);font-size:12px;line-height:1.45;margin-top:4px}
   .mobile-item .icost{color:var(--muted);font-size:12px;margin-top:4px}
   .mobile-actions{position:absolute;right:0;top:10px;display:flex;gap:2px}
@@ -256,6 +265,7 @@
       <div>
         <h1>Historia serwisowa</h1>
         <p class="sub" id="modelName"></p>
+        <p class="sub" id="vehicleVin">VIN: <span>VSSZZZ5FZHR047444</span></p>
       </div>
     </div>
     <div class="tools">
@@ -295,7 +305,7 @@
         <div class="mhead"><h2 id="taskFormTitle">Dodaj zadanie</h2><button class="x" data-close="taskForm" aria-label="Zamknij">&#10005;</button></div>
         <div class="task-fields">
           <div class="wide"><label class="fl" for="tfTitle">Zadanie</label><input id="tfTitle" placeholder="np. Wymiana oleju Haldex" /></div>
-          <div><label class="fl" for="tfMileage">Przy km</label><input id="tfMileage" type="number" placeholder="118000" /></div>
+          <div><label class="fl" for="tfMileage">Przy km</label><input id="tfMileage" class="mileage-input" inputmode="numeric" placeholder="118 000" /></div>
           <div><label class="fl" for="tfDate">Do dnia</label><input id="tfDate" type="date" /></div>
           <div class="wide"><label class="fl" for="tfDesc">Uwagi</label><input id="tfDesc" /></div>
         </div>
@@ -315,8 +325,8 @@
       <div class="grid4" style="margin-top:12px">
         <div><label class="fl">Data od</label><input type="date" id="fDateFrom" /></div>
         <div><label class="fl">Data do</label><input type="date" id="fDateTo" /></div>
-        <div><label class="fl">Przebieg od (km)</label><input type="number" id="fKmFrom" placeholder="0" /></div>
-        <div><label class="fl">Przebieg do (km)</label><input type="number" id="fKmTo" placeholder="999999" /></div>
+        <div><label class="fl">Przebieg od (km)</label><input class="mileage-input" inputmode="numeric" id="fKmFrom" placeholder="0" /></div>
+        <div><label class="fl">Przebieg do (km)</label><input class="mileage-input" inputmode="numeric" id="fKmTo" placeholder="999 999" /></div>
       </div>
       <div class="filterrow">
         <div class="menuwrap">
@@ -324,6 +334,11 @@
           <div class="menu hidden" id="catMenu" style="max-height:300px;overflow:auto;left:0;right:auto"></div>
         </div>
         <div class="chips" id="catChips"></div>
+        <div class="menuwrap">
+          <button class="btn sm" id="placeBtn">Miejsce &#9662;</button>
+          <div class="menu hidden" id="placeMenu" style="max-height:300px;overflow:auto;left:0;right:auto"></div>
+        </div>
+        <div class="chips" id="placeChips"></div>
         <button class="link" id="clearF">Wyczyść filtry</button>
       </div>
     </div>
@@ -363,7 +378,7 @@
     <div class="grid2 f">
       <div><label class="fl">Data</label><input type="date" id="mDate" /></div>
       <div>
-        <label class="fl">Przebieg (km)</label><input type="number" id="mMileage" />
+        <label class="fl">Przebieg (km)</label><input class="mileage-input" inputmode="numeric" id="mMileage" />
         <label class="hint"><input type="checkbox" id="mApprox" /> przebieg szacunkowy</label>
       </div>
     </div>
@@ -381,6 +396,7 @@
       <label class="fl" style="margin-top:10px">Własna kategoria</label><input id="mCustomCat" placeholder="np. Zawieszenie" />
       <button type="button" class="alink" id="mCustomOff">Wybierz z listy gotowych</button>
     </div>
+    <div class="f"><label class="fl" for="mServicePlace">Miejsce / warsztat (opcjonalnie)</label><input id="mServicePlace" list="servicePlaceSuggestions" placeholder="np. EK Racing" autocomplete="off" /></div>
     <input type="hidden" id="mTitle" /><input type="hidden" id="mCat" />
     <div class="f"><label class="fl">Opis (opcjonalnie)</label><textarea id="mDesc" rows="2"></textarea></div>
     <div class="grid2 f">
@@ -392,9 +408,30 @@
       <label class="hint"><input type="radio" name="mStatus" value="completed" checked /> Wykonane</label>
       <label class="hint"><input type="radio" name="mStatus" value="planned" /> Planowane</label>
     </div>
+    <div class="f reminder-options" id="mReminderWrap">
+      <label class="hint" style="margin-top:0"><input type="checkbox" id="mReminder" /> Dodaj przypomnienie o kolejnej wymianie do nadchodzących czynności</label>
+      <div class="hidden" id="mReminderFields">
+        <div><label class="fl" for="mReminderType">Przypomnij po</label><select id="mReminderType"><option value="mileage">Przebiegu</option><option value="date">Czasie</option></select></div>
+        <div class="reminder-fields" id="mReminderMileageFields">
+          <div><label class="fl" for="mReminderKm">Dodatkowy przebieg (km)</label><input id="mReminderKm" class="mileage-input" inputmode="numeric" placeholder="np. 10 000" /></div>
+        </div>
+        <div class="reminder-fields hidden" id="mReminderDateFields">
+          <div><label class="fl" for="mReminderDateAmount">Po upływie</label><input id="mReminderDateAmount" type="number" min="1" step="1" value="12" /></div>
+          <div><label class="fl" for="mReminderDateUnit">Jednostka</label><select id="mReminderDateUnit"><option value="months">miesiącach</option><option value="years">latach</option></select></div>
+        </div>
+      </div>
+    </div>
     <button class="btn primary" id="mSave" style="width:100%;justify-content:center;padding:11px">Zapisz wpis</button>
   </div>
 </div>
+
+<datalist id="servicePlaceSuggestions">
+  <option value="EK Racing"></option>
+  <option value="EK Racing Gdańsk"></option>
+  <option value="Maran"></option>
+  <option value="Carsed"></option>
+  <option value="TGE Auto"></option>
+</datalist>
 
 <!-- RESET MODAL -->
 <div class="ov" id="ovReset">
@@ -423,6 +460,18 @@
 <script>
 "use strict";
 var SEED = {"vehicle":{"model":"SEAT Leon Cupra 5F DSG 300KM (CJXC)"},"categories":["Olej silnikowy","Filtr oleju","Filtr powietrza","Filtr kabinowy","Płyn chłodniczy / Chłodzenie","Płyn hamulcowy","Tarcze hamulcowe przód","Tarcze hamulcowe tył","Klocki hamulcowe","Świece zapłonowe","Olej DSG","Olej mechanizm różnicowy","Opony / Koła","Zawieszenie / Geometria","Akumulator","Klimatyzacja","Diagnostyka / Naprawa","Przegląd","Karoseria / Lakier","Inne","Planowane"],"entryTemplates":[{"label":"Wymiana oleju silnikowego","category":"Olej silnikowy"},{"label":"Wymiana filtra oleju","category":"Filtr oleju"},{"label":"Wymiana filtra powietrza","category":"Filtr powietrza"},{"label":"Wymiana filtra kabinowego","category":"Filtr kabinowy"},{"label":"Wymiana płynu chłodzącego","category":"Płyn chłodniczy / Chłodzenie"},{"label":"Wymiana płynu hamulcowego","category":"Płyn hamulcowy"},{"label":"Wymiana tarcz hamulcowych przód","category":"Tarcze hamulcowe przód"},{"label":"Wymiana tarcz hamulcowych tył","category":"Tarcze hamulcowe tył"},{"label":"Wymiana klocków hamulcowych","category":"Klocki hamulcowe"},{"label":"Wymiana świec zapłonowych","category":"Świece zapłonowe"},{"label":"Wymiana oleju DSG","category":"Olej DSG"},{"label":"Wymiana opon / kół","category":"Opony / Koła"},{"label":"Geometria / zbieżność","category":"Zawieszenie / Geometria"},{"label":"Przegląd okresowy","category":"Przegląd"},{"label":"Diagnostyka / naprawa","category":"Diagnostyka / Naprawa"},{"label":"Inne","category":"Inne"}],"entries":[{"id":82,"date":"2026-10-15","mileage":110000,"mileageApprox":false,"category":"Inne","title":"Wymiana filtr powietrza","description":"MANN C30 005 Allegro. Wymiana samemu","cost":"38","source":null,"status":"completed","done":false},{"id":1,"date":"2018-03-12","mileage":14975,"mileageApprox":false,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers XF LongLife 5W30 VW504/507","cost":null,"source":null,"status":"completed","done":false},{"id":2,"date":"2018-03-19","mileage":15100,"mileageApprox":false,"category":"Płyn chłodniczy / Chłodzenie","title":"Wymiana obudowy termostatu","description":"Pierwsza wymiana obudowy termostatu","cost":null,"source":null,"status":"completed","done":false},{"id":3,"date":"2018-03-19","mileage":15100,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Wymiana sondy lambda","description":null,"cost":null,"source":null,"status":"completed","done":false},{"id":4,"date":"2019-02-25","mileage":30000,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju - przegląd 30k","description":"Millers 5W40 XF LongLife","cost":null,"source":null,"status":"completed","done":false},{"id":5,"date":"2019-02-25","mileage":30000,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"Przegląd 30k","cost":null,"source":null,"status":"completed","done":false},{"id":6,"date":"2019-02-25","mileage":30000,"mileageApprox":true,"category":"Filtr powietrza","title":"Wymiana filtra powietrza (na żądanie)","description":"Mann/Knecht 292x177x70","cost":null,"source":null,"status":"completed","done":false},{"id":7,"date":"2020-02-21","mileage":42000,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers 5W40 XF LongLife","cost":null,"source":null,"status":"completed","done":false},{"id":8,"date":"2020-02-21","mileage":42000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Diagnoza cieknącego termostatu","description":"Problem cieknącego termostatu - druga diagnoza, wymiana zaplanowana na później","cost":null,"source":null,"status":"completed","done":false},{"id":9,"date":"2020-02-26","mileage":42000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Wymiana obudowy termostatu (drugi raz)","description":null,"cost":null,"source":null,"status":"completed","done":false},{"id":10,"date":"2020-06-12","mileage":null,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Błędy komputera i zatrzymanie samochodu","description":"Brak reakcji gazu, po zatrzymaniu ponowne uruchomienie bez błędów. W trakcie jazdy kilka razy skoczyła wskazówka obrotomierza do zera. Wizyta w serwisie - skasowanie błędów (bez procedur), zalecenie obserwacji.","cost":null,"source":null,"status":"completed","done":false},{"id":11,"date":"2020-07-22","mileage":33091,"mileageApprox":false,"category":"Opony / Koła","title":"Założenie opon letnich","description":"Opony letnie PS4s","cost":null,"source":null,"status":"completed","done":false},{"id":12,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Tarcze hamulcowe tył","title":"Wymiana tarcz tył - przegląd 60k","description":"ATE 310mm 7kg, nr kat. 24.0122-0219.1","cost":null,"source":null,"status":"completed","done":false},{"id":13,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Klocki hamulcowe","title":"Wymiana klocków - przegląd 60k","description":"EBC Yellow","cost":null,"source":null,"status":"completed","done":false},{"id":14,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego - przegląd 60k","description":"DOT 4 Motul RBF 600, stalowy oplot z PizzaBrakes","cost":null,"source":null,"status":"completed","done":false},{"id":15,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Filtr powietrza","title":"Wymiana filtra powietrza - przegląd 60k","description":"MANN C30 005","cost":null,"source":null,"status":"completed","done":false},{"id":16,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego - przegląd 60k","description":"Knecht LAK 888","cost":null,"source":null,"status":"completed","done":false},{"id":17,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Filtr oleju","title":"Wymiana filtra oleju - przegląd 60k","description":"MANN HU 6013z","cost":null,"source":null,"status":"completed","done":false},{"id":18,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Olej silnikowy","title":"Wymiana oleju silnikowego - przegląd 60k","description":"Millers 5W40 Energy Efficience","cost":null,"source":null,"status":"completed","done":false},{"id":19,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Olej DSG","title":"Wymiana oleju DSG - przegląd 60k","description":"Olej oryginalny","cost":null,"source":null,"status":"completed","done":false},{"id":20,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Olej mechanizm różnicowy","title":"Wymiana oleju w mechanizmie różnicowym","description":"Olej oryginalny","cost":null,"source":null,"status":"completed","done":false},{"id":21,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Świece zapłonowe","title":"Wymiana świec zapłonowych - przegląd 60k","description":"4x NGK 94833 PLFER7A8EG","cost":null,"source":null,"status":"completed","done":false},{"id":22,"date":"2021-02-01","mileage":54414,"mileageApprox":false,"category":"Akumulator","title":"Naładowanie akumulatora","description":"Było 345/360","cost":null,"source":null,"status":"completed","done":false},{"id":23,"date":"2021-09-02","mileage":60000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Naprawa wycieku płynu chłodniczego","description":"Wymieniona część (prawdopodobnie pompa)","cost":"1185 zł, -90% = 121 zł","source":null,"status":"completed","done":false},{"id":24,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Przegląd","title":"Przegląd okresowy","description":"Serwis bez części własnych","cost":"1218,78 zł","source":null,"status":"completed","done":false},{"id":25,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Tarcze hamulcowe przód","title":"Wymiana tarcz przód","description":"EBC 340mm, EBC BSD1877","cost":"958 zł","source":"https://tomson.com.pl/product-pol-5042-Tarcze-hamulcowe-EBC-BSD1877-Blade-Slot-Design-Audi-A3-S3-RS3-TT-TTS-VW-Golf-VII-GTi-VII-R-Octavia-RS-340-mm-przod.html","status":"completed","done":false},{"id":26,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Klocki hamulcowe","title":"Wymiana klocków przód","description":"EBC DP42127R","cost":"888 zł","source":"https://tomson.com.pl/product-pol-5043-Klocki-hamulcowe-EBC-DP42127R-Yellow-Stuff-Audi-S3-TT-TTS-VW-Golf-VII-GTi-VII-R-Octavia-RS-Seat-Leon-Cupra-przod.html","status":"completed","done":false},{"id":27,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego","description":"TRW GP DOT 4, 1L (wymiana co 2 lata)","cost":"60 zł","source":"https://motostacja.com/p/TRW-PFB601/","status":"completed","done":false},{"id":28,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers CFS NT","cost":null,"source":null,"status":"completed","done":false},{"id":29,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"Knecht LAK 888","cost":"50 zł","source":null,"status":"completed","done":false},{"id":30,"date":"2022-03-01","mileage":66800,"mileageApprox":true,"category":"Zawieszenie / Geometria","title":"Geometria - zbieżność","description":"Lewy przód i prawy tył poza normami, wykonano w ASO","cost":"250 zł","source":null,"status":"completed","done":false},{"id":31,"date":"2022-03-22","mileage":null,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła letnie","description":"PP lekko krzywy od środka - założony na PT","cost":"130 zł netto / 159 zł brutto","source":null,"status":"completed","done":false},{"id":32,"date":"2023-03-01","mileage":71000,"mileageApprox":true,"category":"Inne","title":"Wymiana wycieraczek przód + tył","description":"Bosch AeroTwin","cost":null,"source":null,"status":"completed","done":false},{"id":33,"date":"2023-03-01","mileage":71000,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"Knecht LAK 888","cost":null,"source":null,"status":"completed","done":false},{"id":34,"date":"2024-02-01","mileage":83800,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju - mały przegląd (TGE auto)","description":"Olej 5W40, płukanka silnika","cost":null,"source":null,"status":"completed","done":false},{"id":35,"date":"2024-04-01","mileage":85461,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła letnie (Szmyt)","description":"PS4s - 5,5mm tył; 4mm przód","cost":null,"source":null,"status":"completed","done":false},{"id":36,"date":"2024-04-15","mileage":85461,"mileageApprox":false,"category":"Filtr powietrza","title":"Wymiana filtra powietrza","description":"Mann C30 005","cost":null,"source":null,"status":"completed","done":false},{"id":37,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Świece zapłonowe","title":"Wymiana świec zapłonowych (Maran)","description":"NGK 94833","cost":"1041 zł łącznie (bez robocizny i czyszczenia nadkoli)","source":null,"status":"completed","done":false},{"id":38,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego (Maran)","description":"ATE typ 200 DOT 4","cost":null,"source":null,"status":"completed","done":false},{"id":39,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Klimatyzacja","title":"Czyszczenie klimatyzacji","description":"Pakiet czyszczenia klimatyzacji","cost":"390 zł","source":null,"status":"completed","done":false},{"id":40,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Inne","title":"Czyszczenie podszybia i nadkoli z liści","description":"Udrożnienie odpływów","cost":null,"source":null,"status":"completed","done":false},{"id":41,"date":"2024-04-23","mileage":85700,"mileageApprox":false,"category":"Klimatyzacja","title":"Naprawa wycieku z parownika","description":"Wymiana o-ringów","cost":null,"source":null,"status":"completed","done":false},{"id":42,"date":"2024-06-01","mileage":87000,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego węglowego","description":"Knecht LAK888","cost":null,"source":null,"status":"completed","done":false},{"id":43,"date":"2024-12-01","mileage":90000,"mileageApprox":true,"category":"Opony / Koła","title":"Wymiana na koła zimowe","description":"Nowe opony Nokian Snowproof P 225/45 R17. Problem z wyważeniem 2x tylnych opon (150N i 160N), poprawione przełożenie na feldze - wynik 60N i 65N. Renowacja felg.pl, Hunter test drogowy.","cost":"516 zł (renowacja felg)","source":null,"status":"completed","done":false},{"id":44,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Przegląd","title":"Przegląd okresowy (EK Racing Gdańsk)","description":"Kielnieńska 174","cost":"150 zł","source":null,"status":"completed","done":false},{"id":45,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Klimatyzacja","title":"Odgrzybianie klimatyzacji","description":null,"cost":"50 zł","source":null,"status":"completed","done":false},{"id":46,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Podłączenie komputera diagnostycznego","description":null,"cost":"80 zł","source":null,"status":"completed","done":false},{"id":47,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Olej silnikowy","title":"Wymiana oleju","description":"Millers C3 5W40 Nanodrive","cost":null,"source":null,"status":"completed","done":false},{"id":48,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: skorodowane śruby łącznika wydechu","description":"Zaobserwowane podczas przeglądu EK Racing","cost":null,"source":null,"status":"completed","done":false},{"id":49,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: pocą się amortyzatory przednie","description":"Zaobserwowane podczas przeglądu EK Racing","cost":null,"source":null,"status":"completed","done":false},{"id":50,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: olej na przewodzie prawy przód z turbo","description":"Lekki wyciek oleju - obserwować","cost":null,"source":null,"status":"completed","done":false},{"id":51,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"Uwaga: błąd komputera - katalizator","description":"Błąd zniknął po skasowaniu","cost":null,"source":null,"status":"completed","done":false},{"id":52,"date":"2025-02-14","mileage":97550,"mileageApprox":false,"category":"Płyn chłodniczy / Chłodzenie","title":"Uwaga: gęsty, brudny płyn chłodniczy","description":"Potencjalnie: wymiennik ciepła olej/płyn chłodzący lub uszczelka pod głowicą. Możliwa część: chłodniczka NIS90914 Nielsen, ok. 350 zł, ok. 4h robocizny na wymianę i płukanie układu.","cost":"~350 zł (część)","source":null,"status":"completed","done":false},{"id":53,"date":"2025-04-04","mileage":null,"mileageApprox":false,"category":"Karoseria / Lakier","title":"Zgłoszenie rdzy - Gdańsk","description":null,"cost":null,"source":null,"status":"completed","done":false},{"id":54,"date":"2025-05-01","mileage":97400,"mileageApprox":true,"category":"Filtr kabinowy","title":"Wymiana filtra kabinowego","description":"LAK888 Mann","cost":null,"source":null,"status":"completed","done":false},{"id":55,"date":"2025-05-13","mileage":null,"mileageApprox":false,"category":"Karoseria / Lakier","title":"Ponowne zgłoszenie rdzy","description":"Tym razem skutecznie, z pomiarem grubości lakieru","cost":null,"source":null,"status":"completed","done":false},{"id":56,"date":"2025-06-25","mileage":null,"mileageApprox":false,"category":"Diagnostyka / Naprawa","title":"1sza wizyta w Auto Miras Gdańsk","description":"Diagnoza i kosztorys naprawy - olej w układzie chłodzącym","cost":null,"source":null,"status":"completed","done":false},{"id":57,"date":"2025-07-16","mileage":98000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Naprawa układu chłodzenia (Auto Miras)","description":"Wymiana chłodnicy oleju + elementy towarzyszące + płukanie układu. Płyn chłodzący G12 evo (G12E050A2). Naprawa trwała 16.07.2025-25.07.2025.","cost":null,"source":null,"status":"completed","done":false},{"id":58,"date":"2025-07-16","mileage":98000,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju (Auto Miras)","description":"Millers Energy Efficient C3 5W40 + filtr Filtron 688/2","cost":null,"source":null,"status":"completed","done":false},{"id":59,"date":"2025-10-25","mileage":101645,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła zimowe","description":"Nokian WR Snowproof P 225/45 R17 (Pruszków, ul. Powstańców 3)","cost":"110 zł","source":null,"status":"completed","done":false},{"id":60,"date":"2025-10-27","mileage":101822,"mileageApprox":false,"category":"Zawieszenie / Geometria","title":"Geometria - zbieżność przód/tył","description":"Raszyn","cost":"300 zł","source":null,"status":"completed","done":false},{"id":61,"date":"2026-04-17","mileage":null,"mileageApprox":false,"category":"Opony / Koła","title":"Wymiana na koła letnie (Pruszków)","description":"Lewa tylna felga lekko skrzywiona wewnętrznie, reszta w normie","cost":null,"source":null,"status":"completed","done":false},{"id":62,"date":"2026-06-30","mileage":107500,"mileageApprox":true,"category":"Inne","title":"Wymiana pompki spryskiwacza szyb","description":"Topran 107 819 HP","cost":null,"source":null,"status":"completed","done":false},{"id":63,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Olej silnikowy","title":"Wymiana oleju - przegląd (EK Racing Gdańsk)","description":"Millers 5W40 NanoDrive, Kielnieńska 174","cost":"220 zł robocizna (przegląd + wymiana oleju i filtra)","source":null,"status":"completed","done":false},{"id":64,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Płyn hamulcowy","title":"Wymiana płynu hamulcowego (EK Racing Gdańsk)","description":"Ate typ 200 DOT 4, nr 03.9901-6212","cost":"140 zł robocizna","source":null,"status":"completed","done":false},{"id":65,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Tarcze hamulcowe tył","title":"Wymiana tarcz tył (EK Racing Gdańsk)","description":"Brembo 310mm, nr 09.A200.11","cost":"220 zł robocizna (tarcze+klocki)","source":null,"status":"completed","done":false},{"id":66,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Klocki hamulcowe","title":"Wymiana klocków tył (EK Racing Gdańsk)","description":"EBC Green Stuff DP22173","cost":null,"source":null,"status":"completed","done":false},{"id":67,"date":"2026-07-15","mileage":107500,"mileageApprox":true,"category":"Diagnostyka / Naprawa","title":"Odczyt błędów i zapis przeglądu","description":"Procedura hamulca ręcznego elektrycznego do wymiany tarcz i klocków","cost":"100 zł + 80 zł (procedura hamulca)","source":null,"status":"completed","done":false},{"id":68,"date":"2026-07-27","mileage":108000,"mileageApprox":true,"category":"Płyn chłodniczy / Chłodzenie","title":"Wymiana nagrzewnicy (EK Racing Gdańsk)","description":"Nissen 73980. Płukanie układu chłodzenia Liqui Moly Kuhler Reiniger. Nowy płyn chłodniczy G12 evo.","cost":null,"source":null,"status":"completed","done":false},{"id":73,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Naprawa skorodowanych śrub łącznika wydechu","description":null,"cost":null,"source":null,"status":"planned","done":false},{"id":74,"date":null,"mileage":118000,"mileageApprox":false,"category":"Planowane","title":"Wymiana oleju + filtr (planowana)","description":"Interwał 10 tys. km","cost":null,"source":null,"status":"planned","done":false},{"id":75,"date":null,"mileage":114000,"mileageApprox":false,"category":"Planowane","title":"Wymiana oleju Haldex (planowana)","description":"Poprzednia wymiana przy 54k km","cost":null,"source":null,"status":"planned","done":false},{"id":76,"date":null,"mileage":114000,"mileageApprox":false,"category":"Planowane","title":"Wymiana oleju DSG (planowana)","description":"Poprzednia wymiana przy 54k km","cost":null,"source":null,"status":"planned","done":false},{"id":77,"date":null,"mileage":125700,"mileageApprox":false,"category":"Planowane","title":"Wymiana świec zapłonowych (planowana)","description":"NGK","cost":null,"source":null,"status":"planned","done":false},{"id":78,"date":"2028-07-01","mileage":null,"mileageApprox":false,"category":"Planowane","title":"Wymiana płynu hamulcowego (planowana)","description":null,"cost":null,"source":null,"status":"planned","done":false},{"id":80,"date":null,"mileage":null,"mileageApprox":false,"category":"Planowane","title":"Wymiana rozrządu (warunkowa)","description":"Dopiero gdy pojawią się niepokojące dźwięki","cost":null,"source":null,"status":"planned","done":false},{"id":83,"date":null,"mileage":128000,"mileageApprox":false,"category":"Planowane","title":"Wymiana filtr powietrza","description":"Poprzednia 108500 mann c30005","cost":null,"source":null,"status":"planned","done":false}],"plannedOrder":[76,75,73,74,77,78,80,83]};
+
+function backfillSeedServicePlaces(){
+  SEED.entries.forEach(function(e){
+    var text=String(e.title||'')+' '+String(e.description||''), match=text.match(/\bEK Racing Gdańsk\b/i);
+    if(match)e.servicePlace='EK Racing Gdańsk';
+    else if(/\bEK Racing\b/i.test(text))e.servicePlace='EK Racing';
+    else if(/\bMaran\b/i.test(text))e.servicePlace='Maran';
+    else if(/\bTGE Auto\b/i.test(text))e.servicePlace='TGE Auto';
+    else if(/\bCarsed\b/i.test(text))e.servicePlace='Carsed';
+  });
+}
+backfillSeedServicePlaces();
 
 var K_ENTRIES='csh:entries', K_ORDER='csh:order', K_THEME='csh:theme', K_CURRENT_KM='csh:currentMileage', K_CHANGED='csh:lastChanged';
 var VEHICLE=SEED.vehicle, CATS=SEED.categories, TPL=SEED.entryTemplates;
@@ -461,12 +510,32 @@ var theme   = (function(){
 })();
 var nextId  = Math.max.apply(null, entries.map(function(e){return e.id;}).concat([0])) + 1;
 
-var sortKey='date', sortDir='desc', expanded={}, editingId=null, mobileEditId=null, modalEditId=null, selCats=[], pickedPlannedId=null, plannedDeleteId=null;
+var sortKey='date', sortDir='desc', expanded={}, editingId=null, mobileEditId=null, modalEditId=null, selCats=[], selPlaces=[], pickedPlannedId=null, plannedDeleteId=null;
 var $=function(id){return document.getElementById(id);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function fmtDate(d){if(!d)return '\u2014';var p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function fmtKm(m,a){if(m==null)return '\u2014';return m.toLocaleString('pl-PL')+' km'+(a?' (szac.)':'');}
 function fmtCurrentMileage(m){return m==null?'\u2014':m.toLocaleString('pl-PL')+' km';}
+function fmtMileageInput(value){
+  var digits=String(value==null?'':value).replace(/\D/g,'');
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+}
+function parseMileageInput(value){
+  var raw=String(value==null?'':value).trim();
+  if(!raw)return null;
+  if(!/^\d[\d\s\u00a0\u202f]*$/.test(raw))return NaN;
+  var value=Number(raw.replace(/[\s\u00a0\u202f]/g,''));
+  return Number.isSafeInteger(value)&&value>=0?value:NaN;
+}
+function formatMileageField(input){
+  var old=input.value, caret=input.selectionStart==null?old.length:input.selectionStart;
+  var digitsBefore=old.slice(0,caret).replace(/\D/g,'').length;
+  var formatted=fmtMileageInput(old);
+  input.value=formatted;
+  var next=0,count=0;
+  while(next<formatted.length&&count<digitsBefore){if(/\d/.test(formatted.charAt(next)))count++;next++;}
+  if(input===document.activeElement)input.setSelectionRange(next,next);
+}
 function fmtChanged(ts){
   if(!ts)return '\u2014';
   return new Date(ts).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'});
@@ -511,13 +580,13 @@ function saveCurrentMileage(value){
   return true;
 }
 function commitCurrentMileage(input){
-  var raw=input.value.trim();
-  if(!/^\d+$/.test(raw)||!Number.isSafeInteger(Number(raw))){
+  var value=parseMileageInput(input.value);
+  if(value==null||!Number.isSafeInteger(value)){
     alert('Aktualny przebieg musi być nieujemną liczbą całkowitą kilometrów.');
     renderTop();
     return false;
   }
-  return saveCurrentMileage(Number(raw));
+  return saveCurrentMileage(value);
 }
 function applyTheme(){
   document.documentElement.setAttribute('data-theme',theme);
@@ -549,17 +618,20 @@ function normalizeImportedData(data){
        (e.date!=null&&!/^\d{4}-\d{2}-\d{2}$/.test(e.date))||
        (e.mileage!=null&&(!Number.isFinite(Number(e.mileage))||Number(e.mileage)<0))||
        (e.mileageApprox!=null&&typeof e.mileageApprox!=='boolean')||
+       (e.servicePlace!=null&&typeof e.servicePlace!=='string')||
        (e.done!=null&&typeof e.done!=='boolean')){
       return {error:'Wpis '+(i+1)+' ma nieprawidłową strukturę lub wartości.'};
     }
     ids[e.id]=true;
-    normalized.push({
+    var normalizedEntry={
       id:Number(e.id),date:e.date||null,mileage:e.mileage==null?null:Number(e.mileage),
       mileageApprox:!!e.mileageApprox,category:e.category.trim(),title:e.title.trim(),
       description:e.description==null?null:String(e.description),
       cost:e.cost==null?null:String(e.cost),source:e.source==null?null:String(e.source),
       status:e.status,done:!!e.done
-    });
+    };
+    if(Object.prototype.hasOwnProperty.call(e,'servicePlace'))normalizedEntry.servicePlace=e.servicePlace==null?null:e.servicePlace.trim()||null;
+    normalized.push(normalizedEntry);
   }
   var importedOrder=Array.isArray(data.plannedOrder)?data.plannedOrder:normalized.filter(function(e){return e.status==='planned';}).map(function(e){return e.id;});
   if(importedOrder.some(function(id){return !ids[id];})){
@@ -630,14 +702,15 @@ function plannedSorted(list){
     }).map(function(item){return item.entry;});
 }
 function filtered(){
-  var df=$('fDateFrom').value, dt=$('fDateTo').value, kf=$('fKmFrom').value, kt=$('fKmTo').value;
+  var df=$('fDateFrom').value, dt=$('fDateTo').value, kf=parseMileageInput($('fKmFrom').value), kt=parseMileageInput($('fKmTo').value);
   return entries.filter(function(e){
     if(e.status!=='completed')return false;
     if(df&&(!e.date||e.date<df))return false;
     if(dt&&(!e.date||e.date>dt))return false;
-    if(kf&&(e.mileage==null||e.mileage<+kf))return false;
-    if(kt&&(e.mileage==null||e.mileage>+kt))return false;
+    if(kf!=null&&!Number.isNaN(kf)&&(e.mileage==null||e.mileage<kf))return false;
+    if(kt!=null&&!Number.isNaN(kt)&&(e.mileage==null||e.mileage>kt))return false;
     if(selCats.length&&selCats.indexOf(e.category)<0)return false;
+    if(selPlaces.length&&selPlaces.indexOf(e.servicePlace||'')<0)return false;
     return true;
   });
 }
@@ -666,7 +739,7 @@ function renderTop(){
   var km=done.length?Math.max.apply(null,done.map(function(e){return e.mileage;})):null;
   $('topbar').innerHTML=
     '<span>Ostatni wpis: <b>'+(km!=null?km.toLocaleString('pl-PL')+' km':'\u2014')+'</b></span><span style="opacity:.4">&bull;</span>'+
-    '<span class="current-km-wrap"><span>Aktualny przebieg:</span><input class="current-km" id="currentMileage" type="number" min="0" step="1" inputmode="numeric" aria-label="Edytuj aktualny przebieg w kilometrach" value="'+(currentMileage==null?'':currentMileage)+'" placeholder="km" /><output class="current-km-display" id="currentMileageDisplay" aria-live="polite" aria-label="Aktualny przebieg">'+fmtCurrentMileage(currentMileage)+'</output></span><span style="opacity:.4">&bull;</span>'+
+    '<span class="current-km-wrap"><span>Aktualny przebieg:</span><input class="current-km mileage-input" id="currentMileage" inputmode="numeric" aria-label="Edytuj aktualny przebieg w kilometrach" value="'+(currentMileage==null?'':fmtMileageInput(currentMileage))+'" placeholder="km" /><output class="current-km-display" id="currentMileageDisplay" aria-live="polite" aria-label="Aktualny przebieg">'+fmtCurrentMileage(currentMileage)+'</output></span><span style="opacity:.4">&bull;</span>'+
     '<span class="change-stamp">Ostatnia zmiana: <b>'+fmtChanged(lastChanged)+'</b></span>';
   $('modelName').textContent='SEAT LEON CUPRA 5F DSG 300KM (CJXC)';
 }
@@ -710,7 +783,20 @@ function schedulePlannedWarningRefresh(){
 function renderCats(){
   $('catBtn').innerHTML='Kategorie'+(selCats.length?' ('+selCats.length+')':'')+' &#9662;';
   $('catChips').innerHTML=selCats.map(function(c){return '<span class="chip">'+esc(c)+'<button data-uncat="'+esc(c)+'">&#10005;</button></span>';}).join('');
-  $('catMenu').innerHTML=CATS.map(function(c){return '<label><input type="checkbox" data-cat="'+esc(c)+'"'+(selCats.indexOf(c)>=0?' checked':'')+' /> '+esc(c)+'</label>';}).join('');
+  var query=normalizedSearchText($('catSearch')?$('catSearch').value:'');
+  $('catMenu').innerHTML='<div class="filter-menu-search"><label class="sr-only" for="catSearch">Szukaj kategorii</label><input id="catSearch" type="search" placeholder="Wpisz nazwę kategorii…" autocomplete="off" value="'+esc($('catSearch')?$('catSearch').value:'')+'" /></div>'+
+    CATS.map(function(c){return '<label class="cat-option'+(query&&normalizedSearchText(c).indexOf(query)<0?' hidden':'')+'"><input type="checkbox" data-cat="'+esc(c)+'"'+(selCats.indexOf(c)>=0?' checked':'')+' /> '+esc(c)+'</label>';}).join('');
+}
+function renderPlaces(){
+  var places=Array.from(new Set(entries.map(function(e){return e.servicePlace&&e.servicePlace.trim();}).filter(Boolean)))
+    .sort(function(a,b){return a.localeCompare(b,'pl',{sensitivity:'base'});});
+  $('placeBtn').innerHTML='Miejsce'+(selPlaces.length?' ('+selPlaces.length+')':'')+' &#9662;';
+  $('placeMenu').innerHTML=places.length?places.map(function(place){
+    return '<label><input type="checkbox" data-place="'+esc(place)+'"'+(selPlaces.indexOf(place)>=0?' checked':'')+' /> '+esc(place)+'</label>';
+  }).join(''):'<span style="display:block;padding:9px 12px;color:var(--muted)">Brak zapisanych miejsc.</span>';
+  $('placeChips').innerHTML=selPlaces.map(function(place){
+    return '<span class="chip">'+esc(place)+'<button data-unplace="'+esc(place)+'" aria-label="Usuń filtr miejsca '+esc(place)+'">&#10005;</button></span>';
+  }).join('');
 }
 function renderTable(){
   var gs=groups(), h='';
@@ -742,11 +828,12 @@ function renderTable(){
         if(editingId===e.id){
           h+='<tr class="item"><td></td><td colspan="5"><div class="editgrid">'+
             '<div><label class="fl">Data</label><input type="date" id="e_date" value="'+(e.date||'')+'" /></div>'+
-            '<div><label class="fl">Przebieg</label><input type="number" id="e_km" value="'+(e.mileage==null?'':e.mileage)+'" /><label class="hint"><input type="checkbox" id="e_ap"'+(e.mileageApprox?' checked':'')+' /> szacunkowy</label></div>'+
+            '<div><label class="fl">Przebieg</label><input class="mileage-input" inputmode="numeric" id="e_km" value="'+(e.mileage==null?'':fmtMileageInput(e.mileage))+'" /><label class="hint"><input type="checkbox" id="e_ap"'+(e.mileageApprox?' checked':'')+' /> szacunkowy</label></div>'+
             '<div><label class="fl">Kategoria</label><select id="e_cat">'+CATS.map(function(c){return '<option'+(c===e.category?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select></div>'+
             '<div class="span2"><label class="fl">Czynność</label><input id="e_title" value="'+esc(e.title)+'" /></div>'+
             '<div><label class="fl">Koszt</label><input id="e_cost" value="'+esc(e.cost||'')+'" /></div>'+
             '<div class="span2"><label class="fl">Opis</label><textarea id="e_desc" rows="2">'+esc(e.description||'')+'</textarea></div>'+
+            '<div class="span2"><label class="fl">Miejsce / warsztat</label><input id="e_place" list="servicePlaceSuggestions" value="'+esc(e.servicePlace||'')+'" /></div>'+
             '<div class="span2"><label class="fl">Źródło / link</label><input id="e_src" value="'+esc(e.source||'')+'" /></div>'+
             '<div><label class="fl">Status</label><select id="e_st"><option value="completed"'+(e.status==='completed'?' selected':'')+'>wykonane</option><option value="planned"'+(e.status==='planned'?' selected':'')+'>planowane</option></select></div>'+
             '</div><div class="foot" style="justify-content:flex-start;margin-top:12px">'+
@@ -755,7 +842,7 @@ function renderTable(){
         }else{
           h+='<tr class="item"><td></td>'+
             '<td><span class="cat'+(selCats.indexOf(e.category)>=0?' sel':'')+'">'+esc(e.category)+'</span></td>'+
-            '<td><strong>'+esc(e.title)+'</strong></td>'+
+            '<td><strong>'+esc(e.title)+'</strong>'+(e.servicePlace?'<div class="service-place">Miejsce: '+esc(e.servicePlace)+'</div>':'')+'</td>'+
             '<td style="color:var(--muted);max-width:420px">'+esc(e.description||'\u2014')+
             (e.source?'<a class="src" href="'+esc(e.source)+'" target="_blank" rel="noreferrer">źródło / link</a>':'')+'</td>'+
             '<td style="white-space:nowrap">'+esc(e.cost||'\u2014')+'</td>'+
@@ -790,6 +877,7 @@ function renderMobileHistory(gs){
         h+='<div class="mobile-item">'+
           '<span class="cat'+(selCats.indexOf(e.category)>=0?' sel':'')+'">'+esc(e.category)+'</span>'+
           '<div class="ititle">'+esc(e.title)+'</div>'+
+          (e.servicePlace?'<div class="service-place">Miejsce: '+esc(e.servicePlace)+'</div>':'')+
           (e.description?'<div class="idesc">'+esc(e.description)+'</div>':'')+
           (e.cost?'<div class="icost">Koszt: '+esc(e.cost)+'</div>':'')+
           (e.source?'<a class="src" href="'+esc(e.source)+'" target="_blank" rel="noreferrer">źródło / link</a>':'')+
@@ -827,9 +915,19 @@ function togglePreview(button){
   panel.classList.toggle('open',open);
   button.setAttribute('aria-expanded',open?'true':'false');
 }
-function renderAll(){renderTop();renderPlanned();renderCats();renderTable();}
+function renderAll(){renderTop();renderPlanned();renderCats();renderPlaces();renderTable();}
 
 /* ---------- planned actions ---------- */
+function normalizedSearchText(value){
+  return String(value||'').toLocaleLowerCase('pl').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+function addMonthsToDate(value,months){
+  var base=localDateValue(value);
+  if(!base)return null;
+  var day=base.getDate(), target=new Date(base.getFullYear(),base.getMonth()+months,1);
+  target.setDate(Math.min(day,new Date(target.getFullYear(),target.getMonth()+1,0).getDate()));
+  return target.getFullYear()+'-'+('0'+(target.getMonth()+1)).slice(-2)+'-'+('0'+target.getDate()).slice(-2);
+}
 function toggleDone(id){entries.forEach(function(e){if(e.id===id)e.done=!e.done;});save();renderPlanned();}
 function removeEntry(id){entries=entries.filter(function(e){return e.id!==id;});order=order.filter(function(o){return o!==id;});save();renderAll();}
 function requestPlannedDelete(id){
@@ -853,6 +951,7 @@ function exportTxt(){
     L.push((i+1)+'. '+fmtDate(e.date)+(e.mileage!=null?'  |  '+fmtKm(e.mileage,e.mileageApprox):''));
     L.push('   Kategoria: '+e.category);
     L.push('   Czynność: '+e.title);
+    if(e.servicePlace)L.push('   Miejsce / warsztat: '+e.servicePlace);
     if(e.description)L.push('   Opis: '+e.description);
     if(e.cost)L.push('   Koszt: '+e.cost);
     if(e.source)L.push('   Źródło: '+e.source);
@@ -864,19 +963,19 @@ function exportTxt(){
 /* ---------- modal ---------- */
 function fillPick(){
   var list=plannedOrdered(), done=list.filter(function(e){return e.done;}), rest=list.filter(function(e){return !e.done;});
-  var h='';
+  var h='<div class="picksearch"><label class="sr-only" for="mPickSearch">Szukaj czynności serwisowej</label><input id="mPickSearch" type="search" placeholder="Szukaj czynności lub kategorii…" autocomplete="off" /></div>';
   if(list.length){
     h+='<div class="pickhead">Z listy nadchodzących czynności</div>';
     done.concat(rest).forEach(function(e){
       var d=e.mileage!=null?e.mileage.toLocaleString('pl-PL')+' km':(e.date?fmtDate(e.date):'');
-      h+='<button type="button" class="pickitem'+(e.done?' done':'')+'" data-pick="p'+e.id+'">'+
+      h+='<button type="button" class="pickitem'+(e.done?' done':'')+'" data-pick="p'+e.id+'" data-search="'+esc(normalizedSearchText(e.title+' '+e.category))+'">'+
          '<span class="mk">'+(e.done?'&#10003;':'&#9711;')+'</span>'+
          '<span class="nm">'+esc(e.title)+(d?' <span class="meta">\u00b7 '+esc(d)+'</span>':'')+'</span></button>';
     });
     h+='<div class="sep"></div>';
   }
   h+='<div class="pickhead">Szablony czynności</div>';
-  h+=TPL.map(function(t,i){return '<button type="button" class="pickitem" data-pick="t'+i+'"><span class="mk">&#43;</span><span class="nm">'+esc(t.label)+'</span></button>';}).join('');
+  h+=TPL.map(function(t,i){return '<button type="button" class="pickitem" data-pick="t'+i+'" data-search="'+esc(normalizedSearchText(t.label+' '+t.category))+'"><span class="mk">&#43;</span><span class="nm">'+esc(t.label)+' <span class="meta">\u00b7 '+esc(t.category)+'</span></span></button>';}).join('');
   $('mPickMenu').innerHTML=h;
 }
 function setCustomMode(on){
@@ -887,14 +986,29 @@ function setCustomMode(on){
 function openAdd(){
   modalEditId=null;
   fillPick();
-  ['mDate','mMileage','mDesc','mCost','mSrc','mCustomCat','mTitle','mTitle2','mCat'].forEach(function(i){$(i).value='';});
+  ['mDate','mMileage','mDesc','mCost','mSrc','mCustomCat','mTitle','mTitle2','mCat','mReminderKm','mServicePlace'].forEach(function(i){$(i).value='';});
+  $('mReminderDateAmount').value='12';$('mReminderDateUnit').value='months';$('mReminderType').value='mileage';
   $('mApprox').checked=false;$('mRemove').checked=true;$('mRemoveWrap').classList.add('hidden');
+  $('mReminder').checked=false;$('mReminderFields').classList.add('hidden');$('mReminderWrap').classList.remove('hidden');
+  $('mReminderMileageFields').classList.remove('hidden');$('mReminderDateFields').classList.add('hidden');
   $('mPickLabel').innerHTML='&mdash; wybierz &mdash;';$('mPickLabel').style.color='';
   $('mPickMenu').classList.add('hidden');setCustomMode(false);pickedPlannedId=null;
   document.querySelector('input[name=mStatus][value=completed]').checked=true;
   $('ovAdd').classList.add('on');
 }
 $('mPickBtn').addEventListener('click',function(e){e.stopPropagation();$('mPickMenu').classList.toggle('hidden');});
+$('mPickMenu').addEventListener('input',function(e){
+  if(e.target.id!=='mPickSearch')return;
+  var query=normalizedSearchText(e.target.value), items=$('mPickMenu').querySelectorAll('[data-pick]'), visible=0;
+  for(var i=0;i<items.length;i++){
+    var matches=!query||items[i].getAttribute('data-search').indexOf(query)>=0;
+    items[i].classList.toggle('hidden',!matches);
+    if(matches)visible++;
+  }
+  var empty=$('mPickMenu').querySelector('.pickempty');
+  if(!visible&&!empty){empty=document.createElement('div');empty.className='pickempty';empty.textContent='Brak pasujących czynności.';$('mPickMenu').appendChild(empty);}
+  if(visible&&empty)empty.remove();
+});
 $('mPickMenu').addEventListener('click',function(e){
   e.stopPropagation();
   var b=e.target.closest('[data-pick]');if(!b)return;
@@ -907,9 +1021,10 @@ $('mPickMenu').addEventListener('click',function(e){
     $('mTitle').value=t.title;
     $('mCat').value=(CATS.indexOf(t.category)>=0&&t.category!=='Planowane')?t.category:'Inne';
     if(t.description)$('mDesc').value=t.description;
-    if(t.mileage!=null)$('mMileage').value=t.mileage;
+    if(t.mileage!=null)$('mMileage').value=fmtMileageInput(t.mileage);
     if(t.date)$('mDate').value=t.date;
     if(t.source)$('mSrc').value=t.source;
+    if(t.servicePlace)$('mServicePlace').value=t.servicePlace;
     document.querySelector('input[name=mStatus][value=completed]').checked=true;
     $('mPickLabel').innerHTML=(t.done?'&#10003; ':'')+esc(t.title);
     if(t.done)$('mPickLabel').style.color='var(--green)';
@@ -922,14 +1037,47 @@ $('mPickMenu').addEventListener('click',function(e){
 });
 $('mCustomOn').addEventListener('click',function(){setCustomMode(true);pickedPlannedId=null;$('mRemoveWrap').classList.add('hidden');});
 $('mCustomOff').addEventListener('click',function(){setCustomMode(false);});
+$('mReminder').addEventListener('change',function(){$('mReminderFields').classList.toggle('hidden',!this.checked);});
+$('mReminderType').addEventListener('change',function(){
+  var mileage=this.value==='mileage';
+  $('mReminderMileageFields').classList.toggle('hidden',!mileage);
+  $('mReminderDateFields').classList.toggle('hidden',mileage);
+});
+document.querySelectorAll('input[name=mStatus]').forEach(function(input){
+  input.addEventListener('change',function(){
+    var canRemind=this.value==='completed'&&modalEditId==null;
+    $('mReminderWrap').classList.toggle('hidden',!canRemind);
+    if(!canRemind){$('mReminder').checked=false;$('mReminderFields').classList.add('hidden');}
+  });
+});
 $('mSave').addEventListener('click',function(){
   var custom=!$('mCustomWrap').classList.contains('hidden');
   var cat=custom?($('mCustomCat').value.trim()||'Inne'):($('mCat').value||'Inne');
   var title=(custom?$('mTitle2').value.trim():$('mTitle').value.trim())||cat;
   var st=document.querySelector('input[name=mStatus]:checked').value;
-  var e={id:modalEditId!=null?modalEditId:nextId++,date:$('mDate').value||null,mileage:$('mMileage').value?+$('mMileage').value:null,
+  var mileage=parseMileageInput($('mMileage').value);
+  if(Number.isNaN(mileage)){alert('Przebieg musi być nieujemną liczbą całkowitą kilometrów.');return;}
+  var e={id:modalEditId!=null?modalEditId:nextId++,date:$('mDate').value||null,mileage:mileage,
     mileageApprox:$('mApprox').checked,category:cat,title:title,description:$('mDesc').value.trim()||null,
-    cost:$('mCost').value.trim()||null,source:$('mSrc').value.trim()||null,status:st,done:false};
+    servicePlace:$('mServicePlace').value.trim()||null,cost:$('mCost').value.trim()||null,source:$('mSrc').value.trim()||null,status:st,done:false};
+  var reminder=null;
+  if(modalEditId==null&&st==='completed'&&$('mReminder').checked){
+    if($('mReminderType').value==='mileage'){
+      var interval=parseMileageInput($('mReminderKm').value);
+      if(mileage==null||interval==null||!Number.isSafeInteger(mileage+interval)||interval<=0){
+        alert('Aby dodać przypomnienie przebiegowe, podaj przebieg wpisu i dodatni interwał kilometrów.');
+        return;
+      }
+      reminder={mileage:mileage+interval,date:null,description:'Przypomnienie po '+fmtMileageInput(interval)+' km od tego wpisu.'};
+    }else{
+      var amount=Number($('mReminderDateAmount').value), multiplier=$('mReminderDateUnit').value==='years'?12:1;
+      if(!localDateValue(e.date)||!Number.isSafeInteger(amount)||amount<1||amount>1200){
+        alert('Aby dodać przypomnienie czasowe, podaj datę wpisu i prawidłowy okres (1–1200 miesięcy).');
+        return;
+      }
+      reminder={mileage:null,date:addMonthsToDate(e.date,amount*multiplier),description:'Przypomnienie po '+amount+' '+($('mReminderDateUnit').value==='years'?'latach':'miesiącach')+' od tego wpisu.'};
+    }
+  }
   if(modalEditId!=null){
     entries=entries.map(function(x){return x.id===modalEditId?e:x;});
     if(st==='planned'&&order.indexOf(e.id)<0)order.push(e.id);
@@ -943,14 +1091,23 @@ $('mSave').addEventListener('click',function(){
     entries=entries.filter(function(x){return x.id!==pid;});
     order=order.filter(function(o){return o!==pid;});
   }
+  if(reminder){
+    var planned={id:nextId++,date:reminder.date,mileage:reminder.mileage,mileageApprox:false,category:'Planowane',
+      title:'Kolejna: '+e.title,description:reminder.description,cost:null,source:null,status:'planned',done:false};
+    entries.push(planned);order.push(planned.id);
+  }
   save();renderAll();$('ovAdd').classList.remove('on');
 });
 
 /* ---------- events ---------- */
+document.addEventListener('input',function(e){
+  if(e.target.classList&&e.target.classList.contains('mileage-input'))formatMileageField(e.target);
+});
 $('themeBtn').addEventListener('click',function(){theme=theme==='dark'?'light':'dark';applyTheme();});
 $('optBtn').addEventListener('click',function(e){e.stopPropagation();$('optMenu').classList.toggle('hidden');});
 $('catBtn').addEventListener('click',function(e){e.stopPropagation();$('catMenu').classList.toggle('hidden');});
-document.addEventListener('click',function(){$('optMenu').classList.add('hidden');$('catMenu').classList.add('hidden');});
+$('placeBtn').addEventListener('click',function(e){e.stopPropagation();$('placeMenu').classList.toggle('hidden');});
+document.addEventListener('click',function(){$('optMenu').classList.add('hidden');$('catMenu').classList.add('hidden');$('placeMenu').classList.add('hidden');});
 $('optMenu').addEventListener('click',function(e){e.stopPropagation();
   var a=e.target.closest('[data-act]');if(!a)return;
   var k=a.getAttribute('data-act');$('optMenu').classList.add('hidden');
@@ -962,14 +1119,33 @@ $('catMenu').addEventListener('change',function(e){
   if(e.target.checked){if(selCats.indexOf(c)<0)selCats.push(c);}else{selCats=selCats.filter(function(x){return x!==c;});}
   renderCats();renderTable();renderTop();
 });
+$('catMenu').addEventListener('input',function(e){
+  if(e.target.id!=='catSearch')return;
+  var query=normalizedSearchText(e.target.value), options=$('catMenu').querySelectorAll('.cat-option');
+  for(var i=0;i<options.length;i++){
+    var category=options[i].querySelector('[data-cat]').getAttribute('data-cat');
+    options[i].classList.toggle('hidden',query&&normalizedSearchText(category).indexOf(query)<0);
+  }
+});
 $('catChips').addEventListener('click',function(e){
   var c=e.target.getAttribute('data-uncat');if(!c)return;
   selCats=selCats.filter(function(x){return x!==c;});renderCats();renderTable();renderTop();
 });
+$('placeMenu').addEventListener('click',function(e){e.stopPropagation();});
+$('placeMenu').addEventListener('change',function(e){
+  var place=e.target.getAttribute('data-place');if(!place)return;
+  if(e.target.checked){if(selPlaces.indexOf(place)<0)selPlaces.push(place);}
+  else selPlaces=selPlaces.filter(function(value){return value!==place;});
+  renderPlaces();renderTable();renderTop();
+});
+$('placeChips').addEventListener('click',function(e){
+  var place=e.target.getAttribute('data-unplace');if(!place)return;
+  selPlaces=selPlaces.filter(function(value){return value!==place;});renderPlaces();renderTable();renderTop();
+});
 ['fDateFrom','fDateTo','fKmFrom','fKmTo'].forEach(function(id){$(id).addEventListener('input',function(){renderTable();renderTop();});});
 $('clearF').addEventListener('click',function(){
   ['fDateFrom','fDateTo','fKmFrom','fKmTo'].forEach(function(i){$(i).value='';});
-  selCats=[];renderCats();renderTable();renderTop();
+  selCats=[];selPlaces=[];renderCats();renderPlaces();renderTable();renderTop();
 });
 $('importFile').addEventListener('change',function(){
   var f=this.files[0];if(!f)return;var r=new FileReader();
@@ -1034,7 +1210,9 @@ $('tfCancel').addEventListener('click',function(){
 });
 $('tfAdd').addEventListener('click',function(){
   var t=$('tfTitle').value.trim();if(!t)return;
-  var e={id:nextId++,date:$('tfDate').value||null,mileage:$('tfMileage').value?+$('tfMileage').value:null,
+  var mileage=parseMileageInput($('tfMileage').value);
+  if(Number.isNaN(mileage)){alert('Przebieg musi być nieujemną liczbą całkowitą kilometrów.');return;}
+  var e={id:nextId++,date:$('tfDate').value||null,mileage:mileage,
     mileageApprox:false,category:'Planowane',title:t,description:$('tfDesc').value.trim()||null,
     cost:null,source:null,status:'planned',done:false};
   entries.push(e);order.push(e.id);
@@ -1071,7 +1249,9 @@ $('mobileHistory').addEventListener('click',function(e){
     entries.forEach(function(a){if(a.id===id)x=a;});
     if(!x)return;
     modalEditId=id; fillPick(); pickedPlannedId=null;
-    $('mDate').value=x.date||''; $('mMileage').value=x.mileage==null?'':x.mileage;
+    $('mReminder').checked=false;$('mReminderFields').classList.add('hidden');$('mReminderWrap').classList.add('hidden');
+    $('mDate').value=x.date||''; $('mMileage').value=x.mileage==null?'':fmtMileageInput(x.mileage);
+    $('mServicePlace').value=x.servicePlace||'';
     $('mApprox').checked=!!x.mileageApprox; $('mTitle').value=x.title; $('mCat').value=x.category;
     $('mDesc').value=x.description||''; $('mCost').value=x.cost||''; $('mSrc').value=x.source||'';
     $('mPickLabel').textContent=x.title; $('mPickMenu').classList.add('hidden'); setCustomMode(false);
@@ -1089,12 +1269,15 @@ $('tbody').addEventListener('click',function(e){
   var se=e.target.closest('[data-saveedit]');
   if(se){
     var id=+se.getAttribute('data-saveedit');
+    var editedMileage=parseMileageInput($('e_km').value);
+    if(Number.isNaN(editedMileage)){alert('Przebieg musi być nieujemną liczbą całkowitą kilometrów.');return;}
     entries.forEach(function(x){if(x.id===id){
       x.date=$('e_date').value||null;
-      x.mileage=$('e_km').value?+$('e_km').value:null;
+      x.mileage=editedMileage;
       x.mileageApprox=$('e_ap').checked;
       x.category=$('e_cat').value;
       x.title=$('e_title').value;
+      x.servicePlace=$('e_place').value.trim()||null;
       x.cost=$('e_cost').value||null;
       x.description=$('e_desc').value||null;
       x.source=$('e_src').value.trim()||null;
